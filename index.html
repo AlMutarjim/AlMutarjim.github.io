@@ -12,16 +12,14 @@
     </style>
     <script>
       function getVerse() {
-        const reference = randomReference();
-        const apiUrl = `http://api.alquran.cloud/v1/ayah/${reference}/quran-uthmani`;
+        const apiUrl = "http://api.alquran.cloud/v1/ayah/" + randomReference() + "/quran-uthmani";
 
         fetch(apiUrl)
           .then((response) => response.json())
           .then((data) => {
             document.getElementById("verse").innerHTML =
               data.data.text;
-            document.getElementById("audio").src =
-              `http://cdn.alquran.cloud/media/audio/ayah/ar.hudhaify/${reference}`;
+            getAudio(data.data.number);
           });
       }
 
@@ -31,15 +29,23 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
 
-      function playAudio() {
-        document.getElementById("audio").play();
+      function getAudio(reference) {
+        const audioUrl = "http://api.alquran.cloud/v1/ayah/" + reference + "/audio/ar.hudhaify";
+
+        fetch(audioUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const audio = new Audio(data.data[0].audio);
+            document.getElementById("play").addEventListener("click", function () {
+              audio.play();
+            });
+          });
       }
     </script>
   </head>
   <body onload="getVerse()">
     <h1>Random Quran Verse</h1>
     <p id="verse" class="quran-uthmani"></p>
-    <audio id="audio" controls></audio>
-    <button onclick="playAudio()">Play Audio</button>
+    <button id="play">Play Audio</button>
   </body>
 </html>
