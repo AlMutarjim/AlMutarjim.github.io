@@ -19,7 +19,14 @@
           .then((data) => {
             document.getElementById("verse").innerHTML =
               data.data.text;
-            getAudio(data.data.number);
+              
+            const audioApiUrl = "http://api.alquran.cloud/v1/edition?format=audio&ayah=" + data.data.number;
+            fetch(audioApiUrl)
+              .then((response) => response.json())
+              .then((data) => {
+                const audio = new Audio(data.data[0].audio);
+                audio.play();
+              });
           });
       }
 
@@ -28,24 +35,10 @@
         const max = 6236;
         return Math.floor(Math.random() * (max - min + 1)) + min;
       }
-
-      function getAudio(reference) {
-        const audioUrl = "http://api.alquran.cloud/v1/ayah/" + reference + "/audio/ar.hudhaify";
-
-        fetch(audioUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            const audio = new Audio(data.data[0].audio);
-            document.getElementById("play").addEventListener("click", function () {
-              audio.play();
-            });
-          });
-      }
     </script>
   </head>
   <body onload="getVerse()">
     <h1>Random Quran Verse</h1>
     <p id="verse" class="quran-uthmani"></p>
-    <button id="play">Play Audio</button>
   </body>
 </html>
