@@ -1,44 +1,37 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <style>
-      @font-face {
-        font-family: "quran-uthmani";
-        src: url(quran-uthmani.ttf);
-      }
-      .quran-uthmani {
-        font-family: "quran-uthmani";
-        font-size: 20px;
-      }
-    </style>
-    <script>
-      function getVerse() {
-        const apiUrl = "http://api.alquran.cloud/v1/ayah/" + randomReference() + "/quran-uthmani";
-
-        fetch(apiUrl)
-          .then((response) => response.json())
-          .then((data) => {
-            document.getElementById("verse").innerHTML =
-              data.data.text;
-              
-            const audioApiUrl = "http://api.alquran.cloud/v1/edition?format=audio&ayah=" + data.data.number;
-            fetch(audioApiUrl)
-              .then((response) => response.json())
-              .then((data) => {
-                const audio = new Audio(data.data[0].audio);
-                audio.play();
-              });
-          });
-      }
-
-      function randomReference() {
-        const min = 1;
-        const max = 6236;
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      }
-    </script>
+    <meta charset="UTF-8">
+    <title>Random Quran Verse with Audio</title>
   </head>
-  <body onload="getVerse()">
-    <h1>Random Quran Verse</h1>
-    <p id="verse" class="quran-uthmani"></p>
+  <body>
+    <h1>Random Quran Verse with Audio</h1>
+    <p id="verseText"></p>
+    <audio id="audioControl" controls></audio>
+    <button id="playAudio">Play Audio</button>
+    
+    <script>
+      // Get a random verse number between 1 and 6236 (total number of verses in the Quran)
+      const randomVerse = Math.floor(Math.random() * 6236) + 1;
+      const verseText = document.getElementById("verseText");
+      const audioControl = document.getElementById("audioControl");
+      const playAudio = document.getElementById("playAudio");
+      
+      // Fetch the random verse data from the API
+      fetch(`https://api.alquran.cloud/v1/ayah/${randomVerse}/ar.alafasy`)
+        .then(response => response.json())
+        .then(data => {
+          // Display the verse text
+          verseText.innerHTML = data.data.text;
+          
+          // Update the audio source
+          audioControl.src = data.data.audio;
+        });
+        
+      // Play the audio on button click
+      playAudio.addEventListener("click", function() {
+        audioControl.play();
+      });
+    </script>
   </body>
 </html>
