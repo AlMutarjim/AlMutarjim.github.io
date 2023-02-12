@@ -115,9 +115,9 @@
     .then(data => {
       // Display the verse text
       const text = data.data.text;
-      const firstSixWords = text.split(" ").slice(0, 6).join(" ");
-      const remainingWords = text.split(" ").slice(6).join(" ");
-      verseText.innerHTML = `${firstSixWords} <details><summary></summary>${remainingWords}</details>`;
+      const firstSevenWords = text.split(" ").slice(0, 7).join(" ");
+      const remainingWords = text.split(" ").slice(7).join(" ");
+      verseText.innerHTML = `${firstSevenWords} <details><summary></summary>${remainingWords}</details>`;
 
 
       // Update the audio source
