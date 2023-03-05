@@ -53,7 +53,7 @@
             : (rangeType === "page")
                 ? data.pages.slice(rangeStart - 1, rangeEnd).flatMap(({ verseStart, verseEnd }) => Array.from({ length: verseEnd - verseStart + 1 }, (_, i) => verseStart + i))
                 : data.slice(rangeStart - 1, rangeEnd).flatMap(({ verses: { start, end } }) => Array.from({ length: end - start + 1 }, (_, i) => start + i));
-        const { data: { text, audio: audioUrl } } = await fetch(`http://api.alquran.cloud/v1/ayah/${verses[Math.floor(Math.random() * verses.length)]}/ar.alafasy`).then(response => response.json());
+        const { data: { text, audio: audioUrl } } = await fetch(`https://api.alquran.cloud/v1/ayah/${verses[Math.floor(Math.random() * verses.length)]}/ar.alafasy`).then(response => response.json());
         let displayedText = text.split(' ').slice(0, 8).join(' ');
         displayedText += text.split(' ').length > 14 ? `<span class="spoiler">${text.split(' ').slice(8).join(' ')}</span>` : '';
         if (text.split(' ').length > 14) {
