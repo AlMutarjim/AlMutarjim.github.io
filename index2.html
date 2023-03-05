@@ -1,0 +1,94 @@
+<html>
+<style>
+    .spoiler {
+        color: black;
+        background-color: black;
+        padding: 2px 5px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .spoiler:hover {
+        background-color: transparent;
+    }
+</style>
+
+<body>
+    <h1>Random Quran Verse</h1>
+    <p>Select Range Type:</p>
+    <input type="radio" id="range-juz" name="range-type" value="juz" checked>
+    <label for="range-juz">Juz</label>
+    <input type="radio" id="range-page" name="range-type" value="page">
+    <label for="range-page">Page</label>
+    <input type="radio" id="range-chapter" name="range-type" value="chapter">
+    <label for="range-chapter">Chapter</label><br><br>
+    <p id="range-label">Enter Juz Start:</p>
+    <input type="number" id="range-start" min="1" max="30" required>
+    <p id="range-end-label">Enter Juz End:</p>
+    <input type="number" id="range-end" min="1" max="604" required><br><br>
+    <button onclick="getRandomVerse()">Get Random Verse</button>
+    <br><br>
+    <p>Verse:</p>
+    <p id="verse"></p>
+    <br>
+    <button id="playButton" onclick="playAudio()">Play</button>
+</body>
+<script>
+
+    const API_URLS = {
+        juz: "https://api.npoint.io/64fd1d5a85851c800ac8",
+        page: "https://api.npoint.io/fc9bdcbb5ea70254858f",
+        chapter: "https://api.npoint.io/b18d5bd0e5f82498f1a8"
+    };
+    let audio = new Audio();
+    let playButton = document.getElementById("playButton");
+    const getRandomVerse = async () => {
+        const rangeType = document.querySelector('input[name="range-type"]:checked').value;
+        const rangeStart = +document.getElementById("range-start").value;
+        const rangeEnd = +document.getElementById("range-end").value;
+        const response = await fetch(API_URLS[rangeType]);
+        const data = await response.json();
+        const verses = (rangeType === "juz")
+            ? data.juz.slice(rangeStart - 1, rangeEnd).flatMap(({ start, end }) => Array.from({ length: end - start + 1 }, (_, i) => start + i))
+            : (rangeType === "page")
+                ? data.pages.slice(rangeStart - 1, rangeEnd).flatMap(({ verseStart, verseEnd }) => Array.from({ length: verseEnd - verseStart + 1 }, (_, i) => verseStart + i))
+                : data.slice(rangeStart - 1, rangeEnd).flatMap(({ verses: { start, end } }) => Array.from({ length: end - start + 1 }, (_, i) => start + i));
+        const { data: { text, audio: audioUrl } } = await fetch(`http://api.alquran.cloud/v1/ayah/${verses[Math.floor(Math.random() * verses.length)]}/ar.alafasy`).then(response => response.json());
+        let displayedText = text.split(' ').slice(0, 8).join(' ');
+        displayedText += text.split(' ').length > 14 ? `<span class="spoiler">${text.split(' ').slice(8).join(' ')}</span>` : '';
+        if (text.split(' ').length > 14) {
+            document.getElementById("verse").innerHTML = displayedText;
+            setTimeout(() => {
+                audio.pause();
+                playButton.textContent = "Play";
+            }, 8000);
+        } else {
+            document.getElementById("verse").textContent = text;
+        }
+        audio.src = audioUrl;
+    };
+
+    const playAudio = () => {
+        if (audio.paused || audio.ended) {
+            audio.play();
+            playButton.textContent = "Pause";
+        } else {
+            audio.pause();
+            playButton.textContent = "Play";
+        }
+    };
+
+    audio.addEventListener("ended", () => {
+        playButton.textContent = "Play";
+    });
+
+    document.querySelectorAll('input[name="range-type"]').forEach(input => {
+        input.addEventListener("change", () => {
+            document.getElementById("range-label").textContent = `Enter ${input.value.charAt(0).toUpperCase() + input.value.slice(1)} Start:`;
+            document.getElementById("range-end-label").textContent = `Enter ${input.value.charAt(0).toUpperCase() + input.value.slice(1)} End:`;
+        });
+    });
+
+</script>
+
+</html>
