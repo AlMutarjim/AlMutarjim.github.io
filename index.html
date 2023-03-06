@@ -1,40 +1,180 @@
-<html>
-<style>
-    .spoiler {
-        color: black;
-        background-color: black;
-        padding: 2px 5px;
-        border-radius: 3px;
-        cursor: pointer;
-    }
+<!DOCTYPE html>
+<html lang="en">
 
-    .spoiler:hover {
-        background-color: transparent;
-    }
-</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Quran Verse</title>
+    <!-- Material Design stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Material Design icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Custom styles -->
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            text-align: center;
+            background-color: #fafafa;
+        }
+
+        .spoiler {
+            color: black;
+            background-color: black;
+            padding: 2px 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .spoiler:hover {
+            background-color: transparent;
+        }
+
+        audio {
+            display: none
+        }
+
+        #main-container {
+            margin-top: 50px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .card .card-content {
+            padding: 20px;
+        }
+
+        .card .card-action {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #008080;
+            text-align: center;
+        }
+
+        #range-label,
+        #range-end-label {
+            font-weight: 700;
+            font-size: 16px;
+            color: #008080;
+        }
+
+        .verse input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+            font-size: 16px;
+            font-weight: 700;
+            color: #008080;
+            text-align: center;
+            border: none;
+            border-bottom: 1px solid #008080;
+            width: 50%;
+            margin: 20px auto;
+            padding: 10px;
+        }
+
+        .btn {
+            background-color: #008080;
+        }
+
+        .btn:hover {
+            background-color: #006666;
+        }
+
+        @media (max-width: 1080px) {
+            .card {
+                width: 90%;
+                margin: 0 auto;
+            }
+
+            input[type="number"] {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
 
 <body>
-    <h1>Random Quran Verse</h1>
-    <p>Select Range Type:</p>
-    <input type="radio" id="range-juz" name="range-type" value="juz" checked>
-    <label for="range-juz">Juz</label>
-    <input type="radio" id="range-page" name="range-type" value="page">
-    <label for="range-page">Page</label>
-    <input type="radio" id="range-chapter" name="range-type" value="chapter">
-    <label for="range-chapter">Chapter</label><br><br>
-    <p id="range-label">Enter Juz Start:</p>
-    <input type="number" id="range-start" min="1" max="30" required>
-    <p id="range-end-label">Enter Juz End:</p>
-    <input type="number" id="range-end" min="1" max="604" required><br><br>
-    <button onclick="getRandomVerse()">Get Random Verse</button>
-    <br><br>
-    <p>Verse:</p>
-    <p id="verse"></p>
-    <br>
-    <button id="playButton" onclick="playAudio()">Play</button>
+    <div id="main-container">
+        <div class="row">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Rand Quran</span>
+                        <br>
+                        <div class="row">
+                            <div class="col s4">
+                                <p>
+                                    <label>
+                                        <input type="radio" name="range-type" value="juz" checked />
+                                        <span>Juz</span>
+                                    </label>
+                                </p>
+                            </div>
+                            <div class="col s4">
+                                <p>
+                                    <label>
+                                        <input type="radio" name="range-type" value="page" />
+                                        <span>Halaman</span>
+                                    </label>
+                                </p>
+                            </div>
+                            <div class="col s4">
+                                <p>
+                                    <label>
+                                        <input type="radio" name="range-type" value="chapter" />
+                                        <span>Surat</span>
+                                    </label>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s12 m6 s6">
+                                <p id="range-label">Juz Awal:</p>
+                                <input type="number" id="range-start" min="1" max="30" required>
+                            </div>
+                            <div class="col s12 m6 s6">
+                                <p id="range-end-label">Juz Akhir:</p>
+                                <input type="number" id="range-end" min="1" max="604" required>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-action">
+                        <a class="waves-effect waves-light btn" onclick="getRandomVerse()">Get Random Verse</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-content">
+                        <p id="verse" class="card-title" style=font-family:Arial></p>
+                        <br>
+                        <button class="waves-effect waves-light btn" id="playButton" onclick="playAudio()">
+                        <i class="material-icons">play_arrow</i>
+                        </button>
+                        <audio id="audio" controls></audio>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>&#169; 2023, Muhammad Siddiq</footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 <script>
-
     const API_URLS = {
         juz: "https://api.npoint.io/64fd1d5a85851c800ac8",
         page: "https://api.npoint.io/fc9bdcbb5ea70254858f",
@@ -55,12 +195,12 @@
                 : data.slice(rangeStart - 1, rangeEnd).flatMap(({ verses: { start, end } }) => Array.from({ length: end - start + 1 }, (_, i) => start + i));
         const { data: { text, audio: audioUrl } } = await fetch(`https://api.alquran.cloud/v1/ayah/${verses[Math.floor(Math.random() * verses.length)]}/ar.alafasy`).then(response => response.json());
         let displayedText = text.split(' ').slice(0, 8).join(' ');
-        displayedText += text.split(' ').length > 14 ? `<span class="spoiler">${text.split(' ').slice(8).join(' ')}</span>` : '';
+        displayedText += text.split(' ').length > 14 ? `<span class="spoiler"> ${text.split(' ').slice(8).join(' ')}</span>` : '';
         if (text.split(' ').length > 14) {
             document.getElementById("verse").innerHTML = displayedText;
             setTimeout(() => {
                 audio.pause();
-                playButton.textContent = "Play";
+                playButton.innerHTML = '<i class="material-icons">play_arrow</i>';
             }, 8000);
         } else {
             document.getElementById("verse").textContent = text;
@@ -71,21 +211,21 @@
     const playAudio = () => {
         if (audio.paused || audio.ended) {
             audio.play();
-            playButton.textContent = "Pause";
+            playButton.innerHTML = '<i class="material-icons">pause</i>';
         } else {
             audio.pause();
-            playButton.textContent = "Play";
+            playButton.innerHTML = '<i class="material-icons">play_arrow</i>';
         }
     };
 
     audio.addEventListener("ended", () => {
-        playButton.textContent = "Play";
+        playButton.innerHTML = '<i class="material-icons">play_arrow</i>';
     });
 
     document.querySelectorAll('input[name="range-type"]').forEach(input => {
         input.addEventListener("change", () => {
-            document.getElementById("range-label").textContent = `Enter ${input.value.charAt(0).toUpperCase() + input.value.slice(1)} Start:`;
-            document.getElementById("range-end-label").textContent = `Enter ${input.value.charAt(0).toUpperCase() + input.value.slice(1)} End:`;
+            document.getElementById("range-label").textContent = `${input.value.charAt(0).toUpperCase() + input.value.slice(1)} Awal:`;
+            document.getElementById("range-end-label").textContent = `${input.value.charAt(0).toUpperCase() + input.value.slice(1)} Akhir:`;
         });
     });
 
