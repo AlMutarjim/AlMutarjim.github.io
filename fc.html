@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Price Calculator</title>
+    <style>
+        body {
+            font-family: 'Product Sans', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(60% 90% at 100% 100%, rgba(200, 250, 255, 0.09) 0%, rgba(28, 210, 229, 0.09) 41%, rgba(28, 210, 229, 0) 100%), radial-gradient(44% 64% at 60% 100%, rgba(23, 74, 228, 0.09) 0%, rgba(23, 74, 228, 0) 100%), linear-gradient(180deg, rgba(23, 74, 228, 0) 29.44%, rgba(23, 74, 228, 0.06) 100%), linear-gradient(90deg, #F3F3F7 0%, #edf1f8 100%);
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 3vh 1vh;
+        }
+
+        .face {
+            display: inherit;
+        }
+
+        .color {
+            display: inherit;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        input[type="radio"]+label {
+            display: flex;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 1vh;
+        }
+
+        input[type="radio"]:checked+label {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        input[type="number"] {
+            width: 10vh;
+            height: 4vh;
+            text-align: center;
+            border-radius: 6px;
+            box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px;
+            font-family: inherit;
+            font-size: large;
+        }
+
+        #result {
+            font-size: 5vh;
+            margin: 6vh;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            border: 1px solid #ddd;
+            padding: 5px;
+            width: 80px;
+        }
+
+        input[type=number]:hover {
+            border-color: #999;
+        }
+
+        input[type=number]:focus {
+            border-color: #0078d7;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <div class="choices">
+            <div class="face">
+                <input type="radio" id="oneface" name="face" value="oneface" checked>
+                <label for="oneface">One Face</label>
+                <input type="radio" id="twoface" name="face" value="twoface">
+                <label for="twoface">Two Face</label>
+            </div>
+            <div class="color">
+                <input type="radio" id="color" name="color" value="color">
+                <label for="color">Color</label>
+                <input type="radio" id="bw" name="color" value="bw" checked>
+                <label for="bw">Black and White</label>
+            </div>
+        </div>
+        <input type="number" id="number" name="number">
+        <p><span id="result"></span></p>
+    </form>
+
+    <script>
+        const calculatePrice = () => {
+            const [face, color, number] = ['face', 'color', 'number'].map(name =>
+                name === 'number' ? document.querySelector(`#${name}`).value : document.querySelector(`input[name=${name}]:checked`).value
+            );
+
+            const priceMap = {
+                oneface: { bw: 9, color: 100 },
+                twoface: { bw: 11, color: 110 }
+            };
+
+            const result = Math.ceil((number * priceMap[face][color]) / 50) * 50 / 100;
+            document.querySelector('#result').innerHTML = result;
+        };
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener(input.type === 'radio' ? 'change' : 'input', calculatePrice);
+        });
+    </script>
+</body>
+
+</html>
