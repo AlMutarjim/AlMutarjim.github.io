@@ -45,7 +45,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 450px;
+            min-height: 500px; /* Increased height for extra input */
             position: relative;
         }
 
@@ -103,7 +103,7 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-label {
@@ -128,10 +128,16 @@
         .form-select:focus {
             border-color: var(--primary-color);
         }
+        
+        .form-select:disabled {
+            background-color: #f9fafb;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
 
         /* 3. Quiz Screen */
         #quiz-screen {
-            padding: 0; /* Handled by internal structure */
+            padding: 0;
         }
 
         .quiz-header {
@@ -175,6 +181,7 @@
             color: #6b7280;
             margin-bottom: 10px;
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
         }
 
@@ -268,7 +275,7 @@
             <p>يرجى التأكد من وجود ملف "questions.json" بجانب ملف HTML.</p>
         </div>
 
-        <!-- Screen 3: Selection (Book & Chapter) -->
+        <!-- Screen 3: Selection -->
         <div id="selection-screen" class="screen">
             <h2 style="text-align: center;">إعدادات الاختبار</h2>
             
@@ -283,6 +290,14 @@
                 <label class="form-label">اختر الباب / الفصل:</label>
                 <select id="chapter-select" class="form-select" disabled>
                     <option value="" disabled selected>-- يرجى اختيار الكتاب أولاً --</option>
+                </select>
+            </div>
+
+            <!-- New Sub-Chapter Selection -->
+            <div class="form-group">
+                <label class="form-label">المبحث / الموضوع (اختياري):</label>
+                <select id="sub-chapter-select" class="form-select" disabled>
+                    <option value="" disabled selected>-- الكل --</option>
                 </select>
             </div>
 
@@ -333,8 +348,8 @@
 
     <script>
         // --- State Management ---
-        let allData = []; // Full JSON data
-        let quizQuestions = []; // Filtered & Shuffled questions
+        let allData = []; 
+        let quizQuestions = []; 
         let currentQuestionIndex = 0;
         let score = 0;
         let isAnswered = false;
@@ -351,6 +366,7 @@
         const inputs = {
             book: document.getElementById('book-select'),
             chapter: document.getElementById('chapter-select'),
+            subChapter: document.getElementById('sub-chapter-select'), // New input
             startBtn: document.getElementById('start-quiz-btn'),
             hint: document.getElementById('question-count-hint')
         };
@@ -380,6 +396,7 @@
         // --- 1. Data Loading ---
         async function loadData() {
             try {
+                // Assuming questions.json exists
                 const response = await fetch('questions.json');
                 if (!response.ok) throw new Error("Failed to load");
                 allData = await response.json();
@@ -405,42 +422,49 @@
         function initSelectionScreen() {
             showScreen('selection');
             
-            // 1. Extract unique Books
+            // Extract unique Books
             const books = [...new Set(allData.map(q => q.book))].filter(Boolean);
             
             inputs.book.innerHTML = '<option value="" disabled selected>-- اختر الكتاب --</option>';
             books.forEach(book => {
                 const option = document.createElement('option');
                 option.value = book;
-                option.textContent = book; // You might want a mapping here if names are codes
+                option.textContent = book;
                 inputs.book.appendChild(option);
             });
 
-            // Reset Chapter select
             resetChapterSelect();
         }
 
         function resetChapterSelect() {
             inputs.chapter.innerHTML = '<option value="" disabled selected>-- يرجى اختيار الكتاب أولاً --</option>';
             inputs.chapter.disabled = true;
+            resetSubChapterSelect(true); // Cascade reset
+        }
+
+        function resetSubChapterSelect(fullDisable = false) {
+            inputs.subChapter.innerHTML = '<option value="" disabled selected>-- الكل --</option>';
+            inputs.subChapter.disabled = true;
             inputs.startBtn.disabled = true;
             inputs.hint.textContent = "";
+        }
+
+        function updateQuestionCount() {
+            const count = getFilteredQuestions().length;
+            inputs.startBtn.disabled = count === 0;
+            inputs.hint.textContent = count > 0 
+                ? `عدد الأسئلة المتاحة: ${count}` 
+                : "لا توجد أسئلة لهذا الاختيار";
         }
 
         // Event: Book Selected
         inputs.book.addEventListener('change', () => {
             const selectedBook = inputs.book.value;
-            
-            // Filter data for this book
             const bookQuestions = allData.filter(q => q.book === selectedBook);
-            
-            // Extract unique Chapters for this book
             const chapters = [...new Set(bookQuestions.map(q => q.chapter))].filter(Boolean);
 
-            // Populate Chapter Select
             inputs.chapter.innerHTML = '<option value="" disabled selected>-- اختر الباب / الفصل --</option>';
             
-            // Option to select ALL chapters
             const allOption = document.createElement('option');
             allOption.value = 'ALL_CHAPTERS';
             allOption.textContent = 'اختبار في كامل الكتاب';
@@ -454,15 +478,44 @@
             });
 
             inputs.chapter.disabled = false;
-            inputs.startBtn.disabled = true; // Wait for chapter selection
-            inputs.hint.textContent = "";
+            resetSubChapterSelect(); // Reset sub-chapters
         });
 
         // Event: Chapter Selected
         inputs.chapter.addEventListener('change', () => {
-            const count = getFilteredQuestions().length;
-            inputs.startBtn.disabled = false;
-            inputs.hint.textContent = `عدد الأسئلة المتاحة: ${count}`;
+            const selectedBook = inputs.book.value;
+            const selectedChapter = inputs.chapter.value;
+
+            // 1. Populate Sub-Chapters
+            inputs.subChapter.innerHTML = '<option value="ALL_SUB_CHAPTERS" selected>-- كل المباحث / المواضيع --</option>';
+
+            if (selectedChapter === 'ALL_CHAPTERS') {
+                // If all chapters selected, disable sub-chapter specific selection
+                inputs.subChapter.disabled = true;
+            } else {
+                // Filter sub-chapters for this specific chapter
+                const chapterQuestions = allData.filter(q => q.book === selectedBook && q.chapter === selectedChapter);
+                const subChapters = [...new Set(chapterQuestions.map(q => q['sub-chapter']))].filter(Boolean);
+
+                if (subChapters.length > 0) {
+                    subChapters.forEach(sub => {
+                        const option = document.createElement('option');
+                        option.value = sub;
+                        option.textContent = sub;
+                        inputs.subChapter.appendChild(option);
+                    });
+                    inputs.subChapter.disabled = false;
+                } else {
+                    inputs.subChapter.disabled = true; // No sub-chapters available
+                }
+            }
+
+            updateQuestionCount();
+        });
+
+        // Event: Sub-Chapter Selected
+        inputs.subChapter.addEventListener('change', () => {
+            updateQuestionCount();
         });
 
         // Event: Start Button
@@ -474,16 +527,22 @@
         function getFilteredQuestions() {
             const selectedBook = inputs.book.value;
             const selectedChapter = inputs.chapter.value;
+            const selectedSubChapter = inputs.subChapter.value;
 
             let filtered = allData.filter(q => q.book === selectedBook);
 
             if (selectedChapter !== 'ALL_CHAPTERS') {
                 filtered = filtered.filter(q => q.chapter === selectedChapter);
+                
+                // Only filter by sub-chapter if a specific chapter is selected AND a specific sub-chapter is selected
+                if (selectedSubChapter && selectedSubChapter !== 'ALL_SUB_CHAPTERS') {
+                    filtered = filtered.filter(q => q['sub-chapter'] === selectedSubChapter);
+                }
             }
             return filtered;
         }
 
-        // Fisher-Yates Shuffle Algorithm
+        // Fisher-Yates Shuffle
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -493,21 +552,19 @@
         }
 
         function startQuiz() {
-            // 1. Get and Shuffle Questions
             const filtered = getFilteredQuestions();
-            quizQuestions = shuffleArray([...filtered]); // Create a copy and shuffle
+            quizQuestions = shuffleArray([...filtered]);
 
             if (quizQuestions.length === 0) {
                 alert("لا توجد أسئلة لهذا الاختيار!");
                 return;
             }
 
-            // 2. Reset State
+            // Reset State
             currentQuestionIndex = 0;
             score = 0;
             quizUI.totalNum.textContent = quizQuestions.length;
 
-            // 3. UI Setup
             showScreen('quiz');
             loadQuestion();
         }
@@ -520,9 +577,15 @@
             
             // Update Headers
             quizUI.currentNum.textContent = currentQuestionIndex + 1;
-            quizUI.category.textContent = currentQ['sub-chapter'] || currentQ.chapter;
+            
+            // Show Sub-Chapter if exists, else Chapter
+            const displayCategory = currentQ['sub-chapter'] 
+                ? `${currentQ.chapter} - ${currentQ['sub-chapter']}`
+                : currentQ.chapter;
+                
+            quizUI.category.textContent = displayCategory;
             quizUI.book.textContent = `📘 ${currentQ.book}`;
-            quizUI.page.textContent = `📄 صـ ${currentQ.page || '-'}`;
+            quizUI.page.textContent = currentQ.page ? `📄 صـ ${currentQ.page}` : '';
 
             // Progress Bar
             const progress = (currentQuestionIndex / quizQuestions.length) * 100;
@@ -533,10 +596,6 @@
 
             // Choices
             quizUI.choices.innerHTML = '';
-            // Shuffle choices too? Usually good practice, but sometimes order matters (e.g. "All of the above")
-            // For now, we will render choices as they are in JSON.
-            // If you want to shuffle choices, uncomment next line:
-            // const choicesShuffled = shuffleArray([...currentQ.choices]);
             const choicesToRender = currentQ.choices;
 
             choicesToRender.forEach(choiceText => {
@@ -554,13 +613,11 @@
 
             const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
             
-            // Check Answer
             if (selectedChoice === correctChoice) {
                 selectedBtn.classList.add('correct');
                 score++;
             } else {
                 selectedBtn.classList.add('incorrect');
-                // Highlight correct one
                 allButtons.forEach(btn => {
                     if (btn.textContent === correctChoice) {
                         btn.classList.add('correct');
@@ -568,10 +625,8 @@
                 });
             }
 
-            // Disable all
             allButtons.forEach(btn => btn.disabled = true);
 
-            // Prepare Next Button
             if (currentQuestionIndex < quizQuestions.length - 1) {
                 quizUI.nextBtn.textContent = "السؤال التالي";
                 quizUI.nextBtn.onclick = () => {
@@ -588,7 +643,6 @@
         // --- 4. Result Logic ---
         function finishQuiz() {
             showScreen('result');
-            // Full progress bar
             quizUI.progress.style.width = '100%';
 
             resultUI.finalScore.textContent = score;
@@ -608,7 +662,7 @@
         }
 
         resultUI.restartBtn.addEventListener('click', () => {
-            // Go back to selection screen to choose new topics
+            // Reset selection inputs
             inputs.book.value = "";
             resetChapterSelect();
             initSelectionScreen();
