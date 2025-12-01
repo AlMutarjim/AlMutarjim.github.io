@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الفقه والأصول</title>
+    <!-- Importing Tajawal Font for Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --border-radius: 12px;
+            --input-border: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 450px;
+            position: relative;
+        }
+
+        /* --- Common Elements --- */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        h2 { margin-bottom: 20px; }
+
+        /* --- Screens --- */
+        .screen {
+            padding: 40px;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            height: 100%;
+            flex-grow: 1;
+        }
+
+        .active-screen {
+            display: flex;
+        }
+
+        /* 1. Loading & Error */
+        #loading-screen, #error-screen {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 2. Selection Screen */
+        #selection-screen {
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            background-color: white;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+        }
+
+        /* 3. Quiz Screen */
+        #quiz-screen {
+            padding: 0; /* Handled by internal structure */
+        }
+
+        .quiz-header {
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #e5e7eb;
+            width: 100%;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-info {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .choices-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .choice-btn.correct {
+            background-color: #d1fae5 !important;
+            border-color: var(--success-color) !important;
+            color: #065f46;
+        }
+
+        .choice-btn.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: var(--error-color) !important;
+            color: #991b1b;
+        }
+
+        .choice-btn:disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .quiz-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* 4. Result Screen */
+        #result-screen {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Screen 1: Loading -->
+        <div id="loading-screen" class="screen active-screen">
+            <h2>جاري تحميل البيانات...</h2>
+        </div>
+
+        <!-- Screen 2: Error -->
+        <div id="error-screen" class="screen">
+            <h2 style="color: var(--error-color)">خطأ في تحميل الملف</h2>
+            <p>يرجى التأكد من وجود ملف "questions.json" بجانب ملف HTML.</p>
+        </div>
+
+        <!-- Screen 3: Selection (Book & Chapter) -->
+        <div id="selection-screen" class="screen">
+            <h2 style="text-align: center;">إعدادات الاختبار</h2>
+            
+            <div class="form-group">
+                <label class="form-label">اختر الكتاب:</label>
+                <select id="book-select" class="form-select">
+                    <option value="" disabled selected>-- اختر الكتاب --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">اختر الباب / الفصل:</label>
+                <select id="chapter-select" class="form-select" disabled>
+                    <option value="" disabled selected>-- يرجى اختيار الكتاب أولاً --</option>
+                </select>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="start-quiz-btn" class="btn" disabled>ابدأ الاختبار</button>
+            </div>
+            <p id="question-count-hint" style="text-align: center; margin-top: 10px; color: #6b7280; font-size: 0.9rem;"></p>
+        </div>
+
+        <!-- Screen 4: Quiz -->
+        <div id="quiz-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="quiz-header">
+                <span class="badge" id="category-badge">...</span>
+                <span class="badge">سؤال <span id="current-num">1</span> من <span id="total-num">0</span></span>
+            </div>
+            
+            <div class="quiz-content">
+                <div class="meta-info">
+                    <span id="book-info">📘 الكتاب</span>
+                    <span id="page-info">📄 صفحة 0</span>
+                </div>
+                <h3 class="question-text" id="question-text">...</h3>
+                <div class="choices-grid" id="choices-container">
+                    <!-- Choices injected here -->
+                </div>
+            </div>
+
+            <div class="quiz-footer">
+                <button class="btn" id="next-btn" style="display: none;">السؤال التالي</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Result -->
+        <div id="result-screen" class="screen">
+            <h2>نتيجة الاختبار</h2>
+            <div class="score-display">
+                <span id="final-score">0</span> / <span id="total-score">0</span>
+            </div>
+            <p class="result-message" id="result-message">...</p>
+            <button class="btn" id="restart-btn">إجراء اختبار جديد</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- State Management ---
+        let allData = []; // Full JSON data
+        let quizQuestions = []; // Filtered & Shuffled questions
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // --- DOM Elements ---
+        const screens = {
+            loading: document.getElementById('loading-screen'),
+            error: document.getElementById('error-screen'),
+            selection: document.getElementById('selection-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            result: document.getElementById('result-screen')
+        };
+
+        const inputs = {
+            book: document.getElementById('book-select'),
+            chapter: document.getElementById('chapter-select'),
+            startBtn: document.getElementById('start-quiz-btn'),
+            hint: document.getElementById('question-count-hint')
+        };
+
+        const quizUI = {
+            progress: document.getElementById('progress-fill'),
+            currentNum: document.getElementById('current-num'),
+            totalNum: document.getElementById('total-num'),
+            category: document.getElementById('category-badge'),
+            book: document.getElementById('book-info'),
+            page: document.getElementById('page-info'),
+            text: document.getElementById('question-text'),
+            choices: document.getElementById('choices-container'),
+            nextBtn: document.getElementById('next-btn')
+        };
+
+        const resultUI = {
+            finalScore: document.getElementById('final-score'),
+            totalScore: document.getElementById('total-score'),
+            message: document.getElementById('result-message'),
+            restartBtn: document.getElementById('restart-btn')
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', loadData);
+
+        // --- 1. Data Loading ---
+        async function loadData() {
+            try {
+                const response = await fetch('questions.json');
+                if (!response.ok) throw new Error("Failed to load");
+                allData = await response.json();
+                
+                if (!Array.isArray(allData) || allData.length === 0) {
+                    showScreen('error');
+                    return;
+                }
+
+                initSelectionScreen();
+            } catch (err) {
+                console.error(err);
+                showScreen('error');
+            }
+        }
+
+        function showScreen(screenName) {
+            Object.values(screens).forEach(el => el.classList.remove('active-screen'));
+            screens[screenName].classList.add('active-screen');
+        }
+
+        // --- 2. Selection Logic ---
+        function initSelectionScreen() {
+            showScreen('selection');
+            
+            // 1. Extract unique Books
+            const books = [...new Set(allData.map(q => q.book))].filter(Boolean);
+            
+            inputs.book.innerHTML = '<option value="" disabled selected>-- اختر الكتاب --</option>';
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book;
+                option.textContent = book; // You might want a mapping here if names are codes
+                inputs.book.appendChild(option);
+            });
+
+            // Reset Chapter select
+            resetChapterSelect();
+        }
+
+        function resetChapterSelect() {
+            inputs.chapter.innerHTML = '<option value="" disabled selected>-- يرجى اختيار الكتاب أولاً --</option>';
+            inputs.chapter.disabled = true;
+            inputs.startBtn.disabled = true;
+            inputs.hint.textContent = "";
+        }
+
+        // Event: Book Selected
+        inputs.book.addEventListener('change', () => {
+            const selectedBook = inputs.book.value;
+            
+            // Filter data for this book
+            const bookQuestions = allData.filter(q => q.book === selectedBook);
+            
+            // Extract unique Chapters for this book
+            const chapters = [...new Set(bookQuestions.map(q => q.chapter))].filter(Boolean);
+
+            // Populate Chapter Select
+            inputs.chapter.innerHTML = '<option value="" disabled selected>-- اختر الباب / الفصل --</option>';
+            
+            // Option to select ALL chapters
+            const allOption = document.createElement('option');
+            allOption.value = 'ALL_CHAPTERS';
+            allOption.textContent = 'اختبار في كامل الكتاب';
+            inputs.chapter.appendChild(allOption);
+
+            chapters.forEach(chap => {
+                const option = document.createElement('option');
+                option.value = chap;
+                option.textContent = chap;
+                inputs.chapter.appendChild(option);
+            });
+
+            inputs.chapter.disabled = false;
+            inputs.startBtn.disabled = true; // Wait for chapter selection
+            inputs.hint.textContent = "";
+        });
+
+        // Event: Chapter Selected
+        inputs.chapter.addEventListener('change', () => {
+            const count = getFilteredQuestions().length;
+            inputs.startBtn.disabled = false;
+            inputs.hint.textContent = `عدد الأسئلة المتاحة: ${count}`;
+        });
+
+        // Event: Start Button
+        inputs.startBtn.addEventListener('click', startQuiz);
+
+
+        // --- 3. Quiz Logic ---
+
+        function getFilteredQuestions() {
+            const selectedBook = inputs.book.value;
+            const selectedChapter = inputs.chapter.value;
+
+            let filtered = allData.filter(q => q.book === selectedBook);
+
+            if (selectedChapter !== 'ALL_CHAPTERS') {
+                filtered = filtered.filter(q => q.chapter === selectedChapter);
+            }
+            return filtered;
+        }
+
+        // Fisher-Yates Shuffle Algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            // 1. Get and Shuffle Questions
+            const filtered = getFilteredQuestions();
+            quizQuestions = shuffleArray([...filtered]); // Create a copy and shuffle
+
+            if (quizQuestions.length === 0) {
+                alert("لا توجد أسئلة لهذا الاختيار!");
+                return;
+            }
+
+            // 2. Reset State
+            currentQuestionIndex = 0;
+            score = 0;
+            quizUI.totalNum.textContent = quizQuestions.length;
+
+            // 3. UI Setup
+            showScreen('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            quizUI.nextBtn.style.display = 'none';
+            
+            const currentQ = quizQuestions[currentQuestionIndex];
+            
+            // Update Headers
+            quizUI.currentNum.textContent = currentQuestionIndex + 1;
+            quizUI.category.textContent = currentQ['sub-chapter'] || currentQ.chapter;
+            quizUI.book.textContent = `📘 ${currentQ.book}`;
+            quizUI.page.textContent = `📄 صـ ${currentQ.page || '-'}`;
+
+            // Progress Bar
+            const progress = (currentQuestionIndex / quizQuestions.length) * 100;
+            quizUI.progress.style.width = `${progress}%`;
+
+            // Text
+            quizUI.text.textContent = currentQ.question;
+
+            // Choices
+            quizUI.choices.innerHTML = '';
+            // Shuffle choices too? Usually good practice, but sometimes order matters (e.g. "All of the above")
+            // For now, we will render choices as they are in JSON.
+            // If you want to shuffle choices, uncomment next line:
+            // const choicesShuffled = shuffleArray([...currentQ.choices]);
+            const choicesToRender = currentQ.choices;
+
+            choicesToRender.forEach(choiceText => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choiceText;
+                btn.onclick = () => handleAnswer(btn, choiceText, currentQ.answer);
+                quizUI.choices.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedBtn, selectedChoice, correctChoice) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
+            
+            // Check Answer
+            if (selectedChoice === correctChoice) {
+                selectedBtn.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('incorrect');
+                // Highlight correct one
+                allButtons.forEach(btn => {
+                    if (btn.textContent === correctChoice) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // Disable all
+            allButtons.forEach(btn => btn.disabled = true);
+
+            // Prepare Next Button
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                quizUI.nextBtn.textContent = "السؤال التالي";
+                quizUI.nextBtn.onclick = () => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                };
+            } else {
+                quizUI.nextBtn.textContent = "عرض النتيجة";
+                quizUI.nextBtn.onclick = finishQuiz;
+            }
+            quizUI.nextBtn.style.display = 'inline-block';
+        }
+
+        // --- 4. Result Logic ---
+        function finishQuiz() {
+            showScreen('result');
+            // Full progress bar
+            quizUI.progress.style.width = '100%';
+
+            resultUI.finalScore.textContent = score;
+            resultUI.totalScore.textContent = quizQuestions.length;
+
+            const percentage = (score / quizQuestions.length) * 100;
+            if (percentage === 100) {
+                resultUI.message.textContent = "ممتاز! إجابات كاملة صحيحة 🌟";
+                resultUI.message.style.color = "var(--success-color)";
+            } else if (percentage >= 70) {
+                resultUI.message.textContent = "جيد جداً! نتيجة طيبة ✅";
+                resultUI.message.style.color = "var(--primary-color)";
+            } else {
+                resultUI.message.textContent = "راجع المادة وحاول مرة أخرى 📚";
+                resultUI.message.style.color = "var(--text-color)";
+            }
+        }
+
+        resultUI.restartBtn.addEventListener('click', () => {
+            // Go back to selection screen to choose new topics
+            inputs.book.value = "";
+            resetChapterSelect();
+            initSelectionScreen();
+        });
+
+    </script>
+</body>
+</html>
