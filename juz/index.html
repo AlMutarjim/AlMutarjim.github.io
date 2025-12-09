@@ -306,9 +306,9 @@
                 { text: firstWords, correct: true, full: verseText }
             ];
 
-            // Add 3 random incorrect options
-            const incorrectIndices = getRandomIndices(allAyahs.length, 3, randomIdx);
-            incorrectIndices.forEach(idx => {
+            // Add 3 nearby incorrect options
+            const nearbyIndices = getNearbyIndices(randomIdx, 3, allAyahs.length);
+            nearbyIndices.forEach(idx => {
                 const incorrectText = cleanArabicText(allAyahs[idx].text);
                 correctOptions.push({
                     text: getFirstWords(incorrectText, 3),
@@ -344,9 +344,9 @@
                 { text: lastWords, correct: true, full: verseText }
             ];
 
-            // Add 3 random incorrect options
-            const incorrectIndices = getRandomIndices(allAyahs.length, 3, randomIdx);
-            incorrectIndices.forEach(idx => {
+            // Add 3 nearby incorrect options
+            const nearbyIndices = getNearbyIndices(randomIdx, 3, allAyahs.length);
+            nearbyIndices.forEach(idx => {
                 const incorrectText = cleanArabicText(allAyahs[idx].text);
                 correctOptions.push({
                     text: getLastWords(incorrectText, 3),
@@ -382,9 +382,9 @@
                 { text: firstWordsOfNext, correct: true, full: cleanArabicText(nextVerse.text) }
             ];
 
-            // Add 3 random incorrect options
-            const incorrectIndices = getRandomIndices(allAyahs.length, 3, randomIdx, randomIdx + 1);
-            incorrectIndices.forEach(idx => {
+            // Add 3 nearby incorrect options
+            const nearbyIndices = getNearbyIndices(randomIdx + 1, 3, allAyahs.length);
+            nearbyIndices.forEach(idx => {
                 const incorrectText = cleanArabicText(allAyahs[idx].text);
                 correctOptions.push({
                     text: getFirstWords(incorrectText, 4),
@@ -420,9 +420,9 @@
                 { text: firstWordsOfPrev, correct: true, full: cleanArabicText(prevVerse.text) }
             ];
 
-            // Add 3 random incorrect options
-            const incorrectIndices = getRandomIndices(allAyahs.length, 3, randomIdx, randomIdx - 1);
-            incorrectIndices.forEach(idx => {
+            // Add 3 nearby incorrect options
+            const nearbyIndices = getNearbyIndices(randomIdx - 1, 3, allAyahs.length);
+            nearbyIndices.forEach(idx => {
                 const incorrectText = cleanArabicText(allAyahs[idx].text);
                 correctOptions.push({
                     text: getFirstWords(incorrectText, 4),
@@ -471,6 +471,23 @@
                 }
             }
             return indices;
+        }
+
+        function getNearbyIndices(centerIdx, count, total) {
+            const indices = [];
+            const range = Math.max(5, Math.floor(total / 10)); // Get verses within range of center
+            
+            // Create pool of nearby indices
+            const pool = [];
+            for (let i = Math.max(0, centerIdx - range); i < Math.min(total, centerIdx + range + 1); i++) {
+                if (i !== centerIdx) {
+                    pool.push(i);
+                }
+            }
+            
+            // Shuffle pool and take first 'count' items
+            const shuffled = shuffleArray(pool);
+            return shuffled.slice(0, Math.min(count, shuffled.length));
         }
 
         function shuffleArray(arr) {
