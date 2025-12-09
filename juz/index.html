@@ -563,10 +563,44 @@
                 resultText.textContent = '✗ Incorrect!';
             }
 
-            const fullVerseDiv = document.createElement('div');
-            fullVerseDiv.className = 'full-verse';
-            fullVerseDiv.innerHTML = `<strong>${question.surahName} ${question.surahNumber}:${question.numberInSurah}</strong><br>${question.correctVerse}`;
-            resultText.parentElement.appendChild(fullVerseDiv);
+            // Find the correct verse index in allAyahs
+            const correctVerseIndex = allAyahs.findIndex(ayah => 
+                cleanArabicText(ayah.text) === question.correctVerse
+            );
+
+            // Build context with surrounding verses
+            const contextDiv = document.createElement('div');
+            contextDiv.className = 'verse-context';
+            contextDiv.style.marginTop = '20px';
+
+            let contextHTML = '';
+
+            // Show verse before if it exists
+            if (correctVerseIndex > 0) {
+                const prevVerse = allAyahs[correctVerseIndex - 1];
+                contextHTML += `<div class="surrounding-verse" style="opacity: 0.6; margin-bottom: 10px;">
+                    <small style="color: #999;">${prevVerse.surah.englishName} ${prevVerse.surah.number}:${prevVerse.numberInSurah}</small><br>
+                    <span style="direction: rtl; display: block; text-align: right;">${cleanArabicText(prevVerse.text)}</span>
+                </div>`;
+            }
+
+            // Show correct verse highlighted
+            contextHTML += `<div class="correct-verse" style="background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0;">
+                <strong style="color: #856404;">${question.surahName} ${question.surahNumber}:${question.numberInSurah}</strong><br>
+                <span style="direction: rtl; display: block; text-align: right; color: #333;">${question.correctVerse}</span>
+            </div>`;
+
+            // Show verse after if it exists
+            if (correctVerseIndex < allAyahs.length - 1) {
+                const nextVerse = allAyahs[correctVerseIndex + 1];
+                contextHTML += `<div class="surrounding-verse" style="opacity: 0.6; margin-top: 10px;">
+                    <small style="color: #999;">${nextVerse.surah.englishName} ${nextVerse.surah.number}:${nextVerse.numberInSurah}</small><br>
+                    <span style="direction: rtl; display: block; text-align: right;">${cleanArabicText(nextVerse.text)}</span>
+                </div>`;
+            }
+
+            contextDiv.innerHTML = contextHTML;
+            resultText.parentElement.appendChild(contextDiv);
 
             document.getElementById('next-btn').style.display = 'inline-block';
             document.getElementById('stop-btn').style.display = 'inline-block';
@@ -574,7 +608,7 @@
 
         // Next question
         function nextQuestion() {
-            const fullVerseDiv = document.querySelector('.full-verse');
+            const fullVerseDiv = document.querySelector('.verse-context');
             if (fullVerseDiv) {
                 fullVerseDiv.remove();
             }
