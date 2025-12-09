@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الغريب - Al-Gharib (Quranic Vocabulary)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Amiri', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .terms-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .term-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .term-card:hover {
+            background: #fff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+            border-left-color: #764ba2;
+        }
+
+        .term {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .definition {
+            font-size: 1em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .pagination .page-info {
+            color: #667eea;
+            font-weight: bold;
+            margin: 0 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .total-items {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>الغريب</h1>
+            <p>Quranic Vocabulary (Al-Gharib)</p>
+        </div>
+
+        <div class="content">
+            <div id="loading" class="loading">جاري التحميل...</div>
+            <div id="error"></div>
+            <div id="totalItems" class="total-items"></div>
+            <div id="termsList" class="terms-list"></div>
+        </div>
+
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script>
+        const ITEMS_PER_PAGE = 50;
+        let allTerms = [];
+        let currentPage = 1;
+
+        // Fetch and load data
+        async function loadData() {
+            try {
+                const response = await fetch('gharib.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load gharib.json');
+                }
+                allTerms = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                displayPage(1);
+                renderPagination();
+                displayTotalItems();
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').innerHTML = `<div class="error">خطأ: ${error.message}</div>`;
+            }
+        }
+
+        // Display current page
+        function displayPage(page) {
+            currentPage = page;
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageItems = allTerms.slice(start, end);
+
+            const termsList = document.getElementById('termsList');
+            termsList.innerHTML = '';
+
+            pageItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'term-card';
+                card.innerHTML = `
+                    <div class="term">${item.term}</div>
+                    <div class="definition">${item.definition}</div>
+                `;
+                termsList.appendChild(card);
+            });
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render pagination buttons
+        function renderPagination() {
+            const totalPages = Math.ceil(allTerms.length / ITEMS_PER_PAGE);
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '← السابق';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                if (currentPage > 1) displayPage(currentPage - 1);
+                renderPagination();
+            };
+            paginationDiv.appendChild(prevBtn);
+
+            // Page info
+            const pageInfo = document.createElement('div');
+            pageInfo.className = 'page-info';
+            pageInfo.textContent = `الصفحة ${currentPage} من ${totalPages}`;
+            paginationDiv.appendChild(pageInfo);
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'التالي →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) displayPage(currentPage + 1);
+                renderPagination();
+            };
+            paginationDiv.appendChild(nextBtn);
+        }
+
+        // Display total items
+        function displayTotalItems() {
+            const totalDiv = document.getElementById('totalItems');
+            totalDiv.textContent = `إجمالي المصطلحات: ${allTerms.length}`;
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
