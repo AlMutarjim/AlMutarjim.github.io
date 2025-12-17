@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -46,7 +47,8 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-height: 500px; /* Increased height for extra input */
+            min-height: 500px;
+            /* Increased height for extra input */
             position: relative;
         }
 
@@ -76,12 +78,15 @@
             transform: none;
         }
 
-        h2 { margin-bottom: 20px; }
+        h2 {
+            margin-bottom: 20px;
+        }
 
         /* --- Screens --- */
         .screen {
             padding: 40px;
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             flex-direction: column;
             height: 100%;
             flex-grow: 1;
@@ -92,7 +97,8 @@
         }
 
         /* 1. Loading & Error */
-        #loading-screen, #error-screen {
+        #loading-screen,
+        #error-screen {
             text-align: center;
             justify-content: center;
             align-items: center;
@@ -129,7 +135,7 @@
         .form-select:focus {
             border-color: var(--primary-color);
         }
-        
+
         .form-select:disabled {
             background-color: #f9fafb;
             cursor: not-allowed;
@@ -151,7 +157,7 @@
         }
 
         .badge {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.9rem;
@@ -311,6 +317,7 @@
             .choice-btn {
                 border-width: 3px;
             }
+
             .btn {
                 font-weight: 900;
             }
@@ -323,13 +330,13 @@
                 transition: none !important;
             }
         }
-
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        
+
         <!-- Screen 1: Loading -->
         <div id="loading-screen" class="screen active-screen">
             <h2>جاري تحميل البيانات...</h2>
@@ -346,15 +353,16 @@
         <!-- Screen 3: Selection -->
         <div id="selection-screen" class="screen" tabindex="-1" role="main">
             <h2 style="text-align: center;">إعدادات الاختبار</h2>
-            
+
             <!-- Resume Quiz Section -->
-            <div id="resume-section" style="display: none; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+            <div id="resume-section"
+                style="display: none; background: #fef3c7; border: 2px solid #f59e0b; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
                 <h3 style="margin-top: 0; color: #d97706;">هل تريد استئناف الاختبار السابق؟</h3>
                 <p id="resume-info"></p>
                 <button id="resume-btn" class="btn" style="margin-right: 10px;">استئناف</button>
                 <button id="new-quiz-btn" class="btn" style="background-color: #6b7280;">اختبار جديد</button>
             </div>
-            
+
             <div class="form-group">
                 <label class="form-label" for="book-select">اختر الكتاب:</label>
                 <select id="book-select" class="form-select" aria-label="اختيار الكتاب">
@@ -380,20 +388,23 @@
             <div style="text-align: center; margin-top: 20px;">
                 <button id="start-quiz-btn" class="btn" disabled>ابدأ الاختبار</button>
             </div>
-            <p id="question-count-hint" style="text-align: center; margin-top: 10px; color: #6b7280; font-size: 0.9rem;"></p>
+            <p id="question-count-hint"
+                style="text-align: center; margin-top: 10px; color: #6b7280; font-size: 0.9rem;"></p>
         </div>
 
         <!-- Screen 4: Quiz -->
         <div id="quiz-screen" class="screen" tabindex="-1" role="main">
-            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="تقدم الاختبار">
+            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                aria-label="تقدم الاختبار">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
 
             <div class="quiz-header">
                 <span class="badge" id="category-badge" aria-label="الفئة">...</span>
-                <span class="badge" aria-live="polite">سؤال <span id="current-num">1</span> من <span id="total-num">0</span></span>
+                <span class="badge" aria-live="polite">سؤال <span id="current-num">1</span> من <span
+                        id="total-num">0</span></span>
             </div>
-            
+
             <div class="quiz-content">
                 <div class="meta-info">
                     <span id="book-info">📘 الكتاب</span>
@@ -417,13 +428,14 @@
                 <span id="final-score">0</span> / <span id="total-score">0</span>
             </div>
             <p class="result-message" id="result-message" role="status">...</p>
-            
+
             <!-- Review Section -->
-            <div id="review-section" style="max-height: 300px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #f9fafb; border-radius: 8px; display: none;">
+            <div id="review-section"
+                style="max-height: 300px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #f9fafb; border-radius: 8px; display: none;">
                 <h3 style="margin-top: 0;">مراجعة الإجابات</h3>
                 <div id="review-container"></div>
             </div>
-            
+
             <button class="btn" id="show-review-btn" style="margin-right: 10px; display: none;">عرض المراجعة</button>
             <button class="btn" id="restart-btn">إجراء اختبار جديد</button>
         </div>
@@ -432,8 +444,8 @@
 
     <script>
         // --- State Management ---
-        let allData = []; 
-        let quizQuestions = []; 
+        let allData = [];
+        let quizQuestions = [];
         let userAnswers = []; // Track user answers for review
         let currentQuestionIndex = 0;
         let score = 0;
@@ -499,26 +511,26 @@
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store'
                 });
-                
+
                 if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                
+
                 allData = await response.json();
-                
+
                 if (!Array.isArray(allData) || allData.length === 0) {
                     throw new Error('البيانات فارغة أو صيغة غير صحيحة');
                 }
-                
+
                 // Validate data
                 const invalidCount = allData.filter(q => !validateQuestion(q)).length;
                 if (invalidCount > 0) {
                     console.warn(`${invalidCount} سؤال غير صحيح في الصيغة`);
                 }
-                
+
                 initSelectionScreen();
             } catch (err) {
                 console.error('Error loading data:', err);
                 if (retries > 0) {
-                    document.getElementById('error-details').textContent = 
+                    document.getElementById('error-details').textContent =
                         `خطأ في التحميل. إعادة محاولة (${loadRetries - retries + 1}/${loadRetries})...`;
                     setTimeout(() => loadData(retries - 1), 1500);
                 } else {
@@ -527,7 +539,7 @@
                 }
             }
         }
-        
+
         // Validate question structure
         function validateQuestion(q) {
             const required = ['book', 'chapter', 'question', 'choices', 'answer'];
@@ -562,10 +574,10 @@
                 }
             });
             showScreen('selection');
-            
+
             // Extract unique Books
             const books = [...new Set(allData.map(q => q.book))].filter(Boolean);
-            
+
             inputs.book.innerHTML = '<option value="" disabled selected>-- اختر الكتاب --</option>';
             books.forEach(book => {
                 const option = document.createElement('option');
@@ -593,8 +605,8 @@
         function updateQuestionCount() {
             const count = getFilteredQuestions().length;
             inputs.startBtn.disabled = count === 0;
-            inputs.hint.textContent = count > 0 
-                ? `عدد الأسئلة المتاحة: ${count}` 
+            inputs.hint.textContent = count > 0
+                ? `عدد الأسئلة المتاحة: ${count}`
                 : "لا توجد أسئلة لهذا الاختيار";
         }
 
@@ -613,12 +625,12 @@
                 resultUI.showReviewBtn.textContent = resultUI.reviewSection.style.display === 'none' ? 'عرض المراجعة' : 'إخفاء المراجعة';
             });
         }
-        
+
         // Keyboard navigation
         function handleKeyboardNavigation(e) {
             // Skip if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-            
+
             if (screens.quiz.classList.contains('active-screen')) {
                 // Number keys 1-4 for selecting answers
                 if (!isAnswered && /^[1-4]$/.test(e.key)) {
@@ -638,7 +650,7 @@
                 }
             }
         }
-        
+
         // Before unload warning
         function addBeforeUnloadWarning() {
             window.addEventListener('beforeunload', (e) => {
@@ -648,7 +660,7 @@
                 }
             });
         }
-        
+
         // Check for saved progress and offer to resume
         function checkForSavedProgress() {
             const saved = localStorage.getItem('quizProgress');
@@ -658,7 +670,7 @@
                     // Only offer if less than 24 hours old
                     if (Date.now() - progress.timestamp < 86400000) {
                         const remaining = progress.quizQuestions.length - progress.currentQuestionIndex;
-                        document.getElementById('resume-info').textContent = 
+                        document.getElementById('resume-info').textContent =
                             `لديك اختبار غير مكتمل: ${progress.currentQuestionIndex} من ${progress.quizQuestions.length} سؤال (${remaining} متبقي)`;
                         inputs.resumeSection.style.display = 'block';
                     } else {
@@ -670,25 +682,25 @@
                 }
             }
         }
-        
+
         // Resume saved quiz
         function resumeSavedQuiz() {
             const saved = localStorage.getItem('quizProgress');
             if (!saved) return;
-            
+
             const progress = JSON.parse(saved);
             quizQuestions = progress.quizQuestions;
             currentQuestionIndex = progress.currentQuestionIndex;
             score = progress.score;
             userAnswers = progress.userAnswers;
-            
+
             quizUI.totalNum.textContent = quizQuestions.length;
             inputs.resumeSection.style.display = 'none';
             isQuizInProgress = true;
             showScreen('quiz');
             loadQuestion();
         }
-        
+
         // Save progress
         function saveProgress() {
             if (!isQuizInProgress) return;
@@ -701,7 +713,7 @@
             };
             localStorage.setItem('quizProgress', JSON.stringify(progress));
         }
-        
+
         // Event: Book Selected
         inputs.book.addEventListener('change', () => {
             const selectedBook = inputs.book.value;
@@ -709,7 +721,7 @@
             const chapters = [...new Set(bookQuestions.map(q => q.chapter))].filter(Boolean);
 
             inputs.chapter.innerHTML = '<option value="" disabled selected>-- اختر الباب / الفصل --</option>';
-            
+
             const allOption = document.createElement('option');
             allOption.value = 'ALL_CHAPTERS';
             allOption.textContent = 'اختبار في كامل الكتاب';
@@ -765,7 +777,7 @@
 
         // Event: Start Button
         inputs.startBtn.addEventListener('click', startQuiz);
-        
+
         // Save progress periodically during quiz
         setInterval(() => saveProgress(), 5000);
 
@@ -781,7 +793,7 @@
 
             if (selectedChapter !== 'ALL_CHAPTERS') {
                 filtered = filtered.filter(q => q.chapter === selectedChapter);
-                
+
                 // Only filter by sub-chapter if a specific chapter is selected AND a specific sub-chapter is selected
                 if (selectedSubChapter && selectedSubChapter !== 'ALL_SUB_CHAPTERS') {
                     filtered = filtered.filter(q => q['sub-chapter'] === selectedSubChapter);
@@ -825,17 +837,17 @@
         function loadQuestion() {
             isAnswered = false;
             quizUI.nextBtn.style.display = 'none';
-            
+
             const currentQ = quizQuestions[currentQuestionIndex];
-            
+
             // Update Headers
             quizUI.currentNum.textContent = currentQuestionIndex + 1;
-            
+
             // Show Sub-Chapter if exists, else Chapter
-            const displayCategory = currentQ['sub-chapter'] 
+            const displayCategory = currentQ['sub-chapter']
                 ? `${currentQ.chapter} - ${currentQ['sub-chapter']}`
                 : currentQ.chapter;
-                
+
             quizUI.category.textContent = displayCategory;
             quizUI.book.textContent = `📘 ${currentQ.book}`;
             quizUI.page.textContent = currentQ.page ? `📄 صـ ${currentQ.page}` : '';
@@ -848,9 +860,9 @@
             // Text
             quizUI.text.textContent = currentQ.question;
 
-            // Choices
+            // Choices - shuffle to prevent position memorization
             quizUI.choices.innerHTML = '';
-            const choicesToRender = currentQ.choices;
+            const choicesToRender = shuffleArray([...currentQ.choices]);
 
             choicesToRender.forEach(choiceText => {
                 const btn = document.createElement('button');
@@ -867,7 +879,7 @@
 
             const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
             const isCorrect = selectedChoice === correctChoice;
-            
+
             // Track answer
             userAnswers.push({
                 question: quizQuestions[currentQuestionIndex].question,
@@ -877,7 +889,7 @@
                 book: quizQuestions[currentQuestionIndex].book,
                 chapter: quizQuestions[currentQuestionIndex].chapter
             });
-            
+
             if (isCorrect) {
                 selectedBtn.classList.add('correct');
                 score++;
@@ -911,7 +923,7 @@
             isQuizInProgress = false;
             localStorage.removeItem('quizProgress');
             saveStatistics();
-            
+
             showScreen('result');
             quizUI.progress.style.width = '100%';
 
@@ -932,19 +944,19 @@
                 resultUI.message.textContent = "راجع المادة وحاول مرة أخرى 📚";
                 resultUI.message.style.color = "var(--error-color)";
             }
-            
+
             // Generate review
             generateReview();
         }
-        
+
         // Generate review of incorrect answers
         function generateReview() {
             const incorrectAnswers = userAnswers.filter(a => !a.isCorrect);
-            
+
             if (incorrectAnswers.length > 0) {
                 resultUI.showReviewBtn.style.display = 'inline-block';
                 resultUI.reviewContainer.innerHTML = '';
-                
+
                 incorrectAnswers.forEach((answer, index) => {
                     const item = document.createElement('div');
                     item.className = 'review-item incorrect';
@@ -959,12 +971,12 @@
                 resultUI.showReviewBtn.style.display = 'none';
             }
         }
-        
+
         // Save statistics to local storage
         function saveStatistics() {
             const stats = JSON.parse(localStorage.getItem('quizStats') || '[]');
             const percentage = (score / quizQuestions.length) * 100;
-            
+
             stats.push({
                 date: new Date().toISOString(),
                 score: score,
@@ -973,12 +985,12 @@
                 book: inputs.book.value,
                 chapter: inputs.chapter.value !== 'ALL_CHAPTERS' ? inputs.chapter.value : 'كل الأبواب'
             });
-            
+
             // Keep only last 50 attempts
             if (stats.length > 50) {
                 stats.shift();
             }
-            
+
             localStorage.setItem('quizStats', JSON.stringify(stats));
         }
 
@@ -1005,4 +1017,5 @@
     9. ✓ Confirmation Dialogs: Prevent accidental quiz interruption with beforeunload event
     -->
 </body>
+
 </html>
