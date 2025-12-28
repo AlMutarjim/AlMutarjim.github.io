@@ -346,7 +346,7 @@
         <div id="error-screen" class="screen" tabindex="-1" role="alert">
             <h2 style="color: var(--error-color)">خطأ في تحميل الملف</h2>
             <p id="error-details"></p>
-            <p>يرجى التأكد من وجود ملف "questions.json" بجانب ملف HTML.</p>
+            <p>يرجى التأكد من وجود ملفات البيانات بشكل صحيح في مجلد "questions".</p>
             <button id="retry-btn" class="btn" style="margin-top: 20px;">إعادة محاولة</button>
         </div>
 
@@ -507,14 +507,31 @@
         // --- 1. Data Loading with Retry & Validation ---
         async function loadData(retries = loadRetries) {
             try {
-                const response = await fetch('questions.json', {
+                // 1. Fetch the list of question files (manifest)
+                const indexResponse = await fetch('questions/index.json', {
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store'
                 });
+                if (!indexResponse.ok) throw new Error(`Failed to load index: ${indexResponse.status}`);
 
-                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const fileList = await indexResponse.json();
+                if (!Array.isArray(fileList) || fileList.length === 0) {
+                    throw new Error('قائمة الملفات فارغة');
+                }
 
-                allData = await response.json();
+                // 2. Fetch all files in parallel
+                const fetchPromises = fileList.map(filename =>
+                    fetch(`questions/${filename}`, { headers: { 'Accept': 'application/json' } })
+                        .then(res => {
+                            if (!res.ok) throw new Error(`HTTP ${res.status} for ${filename}`);
+                            return res.json();
+                        })
+                );
+
+                const results = await Promise.all(fetchPromises);
+
+                // 3. Merge data
+                allData = results.flat();
 
                 if (!Array.isArray(allData) || allData.length === 0) {
                     throw new Error('البيانات فارغة أو صيغة غير صحيحة');
