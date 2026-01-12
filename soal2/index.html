@@ -595,6 +595,7 @@
             const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
             const isCorrect = selectedChoice === correctChoice;
 
+            // Record the answer (no visual feedback during quiz)
             userAnswers.push({
                 questionIndex: currentQuestionIndex,
                 question: quizQuestions[currentQuestionIndex].question,
@@ -604,19 +605,17 @@
             });
 
             if (isCorrect) {
-                selectedBtn.classList.add('correct');
                 score++;
-            } else {
-                selectedBtn.classList.add('incorrect');
-                allButtons.forEach(btn => {
-                    if (btn.textContent === correctChoice) {
-                        btn.classList.add('correct');
-                    }
-                });
             }
 
+            // Mark selected answer visually (neutral color, not correct/incorrect)
+            selectedBtn.style.borderColor = 'var(--primary-color)';
+            selectedBtn.style.backgroundColor = '#eff6ff';
+
+            // Disable all buttons
             allButtons.forEach(btn => btn.disabled = true);
 
+            // Show next button
             if (currentQuestionIndex < quizQuestions.length - 1) {
                 quizUI.nextBtn.textContent = "السؤال التالي";
                 quizUI.nextBtn.onclick = () => {
