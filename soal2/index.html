@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="اختبار تفاعلي في أصول الفقه">
+    <title>اختبار أصول الفقه</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --border-radius: 12px;
+            --input-border: #d1d5db;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 500px;
+            position: relative;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn-export {
+            background-color: #059669;
+        }
+
+        .btn-export:hover {
+            background-color: #047857;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .screen {
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            flex-grow: 1;
+        }
+
+        .active-screen {
+            display: flex;
+        }
+
+        #loading-screen,
+        #error-screen {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #start-screen {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .exam-info {
+            margin: 20px 0;
+            color: #6b7280;
+        }
+
+        #quiz-screen {
+            padding: 0;
+        }
+
+        .quiz-header {
+            padding: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #e5e7eb;
+            width: 100%;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .choices-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: #eff6ff;
+        }
+
+        .choice-btn.correct {
+            background-color: #d1fae5 !important;
+            border-color: var(--success-color) !important;
+            color: #065f46;
+        }
+
+        .choice-btn.incorrect {
+            background-color: #fee2e2 !important;
+            border-color: var(--error-color) !important;
+            color: #991b1b;
+        }
+
+        .choice-btn:disabled {
+            cursor: default;
+            opacity: 0.8;
+        }
+
+        .quiz-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        #result-screen {
+            text-align: center;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 30px;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .result-message {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .review-section {
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            text-align: right;
+            width: 100%;
+        }
+
+        .review-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-right: 4px solid #d1d5db;
+            font-size: 0.9rem;
+        }
+
+        .review-item.correct {
+            border-right-color: var(--success-color);
+        }
+
+        .review-item.incorrect {
+            border-right-color: var(--error-color);
+        }
+
+        .review-item-question {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .review-item-answer {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        *:focus {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        button:focus {
+            outline-offset: 0;
+        }
+
+        .choice-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        @media (prefers-contrast: more) {
+            .choice-btn {
+                border-width: 3px;
+            }
+
+            .btn {
+                font-weight: 900;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Screen 1: Loading -->
+        <div id="loading-screen" class="screen active-screen">
+            <h2>جاري تحميل الأسئلة...</h2>
+        </div>
+
+        <!-- Screen 2: Error -->
+        <div id="error-screen" class="screen" tabindex="-1" role="alert">
+            <h2 style="color: var(--error-color)">خطأ في تحميل الأسئلة</h2>
+            <p id="error-details"></p>
+            <button id="retry-btn" class="btn" style="margin-top: 20px;">إعادة محاولة</button>
+        </div>
+
+        <!-- Screen 3: Start -->
+        <div id="start-screen" class="screen" tabindex="-1" role="main">
+            <h2>اختبار أصول الفقه</h2>
+            <p class="exam-info">عدد الأسئلة: <strong id="question-count">0</strong></p>
+            <button id="start-btn" class="btn">ابدأ الاختبار</button>
+        </div>
+
+        <!-- Screen 4: Quiz -->
+        <div id="quiz-screen" class="screen" tabindex="-1" role="main">
+            <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                aria-label="تقدم الاختبار">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="quiz-header">
+                <span class="badge" aria-live="polite">سؤال <span id="current-num">1</span> من <span
+                        id="total-num">0</span></span>
+            </div>
+
+            <div class="quiz-content">
+                <h3 class="question-text" id="question-text" role="heading" aria-level="2">...</h3>
+                <div class="choices-grid" id="choices-container" role="group" aria-label="الخيارات المتاحة">
+                    <!-- Choices injected here -->
+                </div>
+            </div>
+
+            <div class="quiz-footer">
+                <button class="btn" id="next-btn" style="display: none;">السؤال التالي</button>
+            </div>
+        </div>
+
+        <!-- Screen 5: Result -->
+        <div id="result-screen" class="screen" tabindex="-1" role="main">
+            <h2>نتيجة الاختبار</h2>
+            <div class="score-display" aria-label="النتيجة النهائية">
+                <span id="final-score">0</span> / <span id="total-score">0</span>
+            </div>
+            <p class="result-message" id="result-message" role="status">...</p>
+
+            <!-- Review Section -->
+            <div id="review-section" class="review-section" style="display: none;">
+                <h3 style="margin-top: 0; margin-bottom: 15px;">مراجعة الإجابات</h3>
+                <div id="review-container"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="show-review-btn" style="display: none;">عرض المراجعة</button>
+                <button class="btn btn-export" id="export-btn">تصدير النتيجة</button>
+                <button class="btn" id="restart-btn">إعادة الاختبار</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- State Management ---
+        let allQuestions = [];
+        let quizQuestions = [];
+        let userAnswers = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // --- DOM Elements ---
+        const screens = {
+            loading: document.getElementById('loading-screen'),
+            error: document.getElementById('error-screen'),
+            start: document.getElementById('start-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            result: document.getElementById('result-screen')
+        };
+
+        const quizUI = {
+            progress: document.getElementById('progress-fill'),
+            currentNum: document.getElementById('current-num'),
+            totalNum: document.getElementById('total-num'),
+            text: document.getElementById('question-text'),
+            choices: document.getElementById('choices-container'),
+            nextBtn: document.getElementById('next-btn')
+        };
+
+        const resultUI = {
+            finalScore: document.getElementById('final-score'),
+            totalScore: document.getElementById('total-score'),
+            message: document.getElementById('result-message'),
+            restartBtn: document.getElementById('restart-btn'),
+            reviewSection: document.getElementById('review-section'),
+            reviewContainer: document.getElementById('review-container'),
+            showReviewBtn: document.getElementById('show-review-btn'),
+            exportBtn: document.getElementById('export-btn')
+        };
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+            attachEventListeners();
+        });
+
+        // --- Data Loading ---
+        async function loadData() {
+            try {
+                // Try fetch first (works with web servers)
+                let data;
+                if (typeof fetch !== 'undefined') {
+                    try {
+                        const response = await fetch('questions/questions.json', {
+                            headers: { 'Accept': 'application/json' },
+                            cache: 'no-store'
+                        });
+                        if (response.ok) {
+                            data = await response.json();
+                        }
+                    } catch (fetchError) {
+                        console.log('Fetch failed, trying XMLHttpRequest...', fetchError);
+                    }
+                }
+
+                // Fallback to XMLHttpRequest (works better with file:// protocol)
+                if (!data) {
+                    data = await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', 'questions/questions.json', true);
+                        xhr.responseType = 'json';
+                        xhr.onload = function () {
+                            if (xhr.status === 200 || xhr.status === 0) { // status 0 for file:// protocol
+                                resolve(xhr.response);
+                            } else {
+                                reject(new Error(`HTTP ${xhr.status}`));
+                            }
+                        };
+                        xhr.onerror = function () {
+                            reject(new Error('فشل تحميل الملف. جرب فتح الصفحة عبر خادم محلي.'));
+                        };
+                        xhr.send();
+                    });
+                }
+
+                allQuestions = data;
+
+                if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
+                    throw new Error('ملف الأسئلة فارغ');
+                }
+
+                // Validate questions
+                const invalidCount = allQuestions.filter(q => !validateQuestion(q)).length;
+                if (invalidCount > 0) {
+                    console.warn(`${invalidCount} سؤال غير صحيح في الصيغة`);
+                }
+
+                document.getElementById('question-count').textContent = allQuestions.length;
+                showScreen('start');
+
+            } catch (err) {
+                console.error('Error loading data:', err);
+                showScreen('error');
+                document.getElementById('error-details').textContent = err.message || 'فشل تحميل الأسئلة';
+            }
+        }
+
+        function validateQuestion(q) {
+            const required = ['question', 'choices', 'answer'];
+            if (!required.every(field => q[field] !== undefined && q[field] !== null)) return false;
+            if (!Array.isArray(q.choices) || q.choices.length < 2) return false;
+            if (!q.choices.includes(q.answer)) return false;
+            return true;
+        }
+
+        function showScreen(screenName) {
+            Object.entries(screens).forEach(([name, el]) => {
+                el.classList.remove('active-screen');
+                el.setAttribute('aria-hidden', name !== screenName);
+            });
+            screens[screenName].classList.add('active-screen');
+            setTimeout(() => screens[screenName].focus(), 100);
+        }
+
+        // --- Event Listeners ---
+        function attachEventListeners() {
+            document.getElementById('retry-btn').addEventListener('click', () => loadData());
+            document.getElementById('start-btn').addEventListener('click', startQuiz);
+            resultUI.restartBtn.addEventListener('click', restartQuiz);
+            resultUI.showReviewBtn.addEventListener('click', toggleReview);
+            resultUI.exportBtn.addEventListener('click', exportResults);
+            document.addEventListener('keydown', handleKeyboardNavigation);
+        }
+
+        function handleKeyboardNavigation(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+            if (screens.quiz.classList.contains('active-screen')) {
+                if (!isAnswered && /^[1-4]$/.test(e.key)) {
+                    e.preventDefault();
+                    const buttons = quizUI.choices.querySelectorAll('.choice-btn');
+                    const index = parseInt(e.key) - 1;
+                    if (buttons[index] && !buttons[index].disabled) {
+                        buttons[index].click();
+                    }
+                } else if (isAnswered && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    if (quizUI.nextBtn.style.display !== 'none') {
+                        quizUI.nextBtn.click();
+                    }
+                }
+            }
+        }
+
+        // --- Quiz Logic ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            quizQuestions = shuffleArray([...allQuestions]);
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+
+            quizUI.totalNum.textContent = quizQuestions.length;
+            showScreen('quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            quizUI.nextBtn.style.display = 'none';
+
+            const currentQ = quizQuestions[currentQuestionIndex];
+
+            quizUI.currentNum.textContent = currentQuestionIndex + 1;
+
+            const progress = (currentQuestionIndex / quizQuestions.length) * 100;
+            quizUI.progress.style.width = `${progress}%`;
+            document.querySelector('[role="progressbar"]').setAttribute('aria-valuenow', Math.round(progress));
+
+            quizUI.text.textContent = currentQ.question;
+
+            quizUI.choices.innerHTML = '';
+            const choicesToRender = shuffleArray([...currentQ.choices]);
+
+            choicesToRender.forEach(choiceText => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choiceText;
+                btn.onclick = () => handleAnswer(btn, choiceText, currentQ.answer);
+                quizUI.choices.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedBtn, selectedChoice, correctChoice) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
+            const isCorrect = selectedChoice === correctChoice;
+
+            userAnswers.push({
+                questionIndex: currentQuestionIndex,
+                question: quizQuestions[currentQuestionIndex].question,
+                userAnswer: selectedChoice,
+                correctAnswer: correctChoice,
+                isCorrect: isCorrect
+            });
+
+            if (isCorrect) {
+                selectedBtn.classList.add('correct');
+                score++;
+            } else {
+                selectedBtn.classList.add('incorrect');
+                allButtons.forEach(btn => {
+                    if (btn.textContent === correctChoice) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (currentQuestionIndex < quizQuestions.length - 1) {
+                quizUI.nextBtn.textContent = "السؤال التالي";
+                quizUI.nextBtn.onclick = () => {
+                    currentQuestionIndex++;
+                    loadQuestion();
+                };
+            } else {
+                quizUI.nextBtn.textContent = "عرض النتيجة";
+                quizUI.nextBtn.onclick = finishQuiz;
+            }
+            quizUI.nextBtn.style.display = 'inline-block';
+        }
+
+        // --- Result Logic ---
+        function finishQuiz() {
+            showScreen('result');
+            quizUI.progress.style.width = '100%';
+
+            resultUI.finalScore.textContent = score;
+            resultUI.totalScore.textContent = quizQuestions.length;
+
+            const percentage = (score / quizQuestions.length) * 100;
+            if (percentage === 100) {
+                resultUI.message.textContent = "ممتاز! إجابات كاملة صحيحة 🌟";
+                resultUI.message.style.color = "var(--success-color)";
+            } else if (percentage >= 70) {
+                resultUI.message.textContent = "جيد جداً! نتيجة طيبة ✅";
+                resultUI.message.style.color = "var(--primary-color)";
+            } else if (percentage >= 50) {
+                resultUI.message.textContent = "جيد! استمر في المذاكرة 📖";
+                resultUI.message.style.color = "var(--text-color)";
+            } else {
+                resultUI.message.textContent = "راجع المادة وحاول مرة أخرى 📚";
+                resultUI.message.style.color = "var(--error-color)";
+            }
+
+            generateReview();
+        }
+
+        function generateReview() {
+            resultUI.reviewContainer.innerHTML = '';
+
+            userAnswers.forEach((answer, index) => {
+                const item = document.createElement('div');
+                item.className = `review-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
+
+                if (answer.isCorrect) {
+                    item.innerHTML = `
+                        <div class="review-item-question">سؤال ${index + 1}: ${answer.question}</div>
+                        <div class="review-item-answer">✓ إجابتك صحيحة: <strong style="color: var(--success-color);">${answer.userAnswer}</strong></div>
+                    `;
+                } else {
+                    item.innerHTML = `
+                        <div class="review-item-question">سؤال ${index + 1}: ${answer.question}</div>
+                        <div class="review-item-answer">✗ إجابتك: <strong>${answer.userAnswer}</strong></div>
+                        <div class="review-item-answer">✓ الإجابة الصحيحة: <strong style="color: var(--success-color);">${answer.correctAnswer}</strong></div>
+                    `;
+                }
+                resultUI.reviewContainer.appendChild(item);
+            });
+
+            resultUI.showReviewBtn.style.display = 'inline-block';
+        }
+
+        function toggleReview() {
+            const isHidden = resultUI.reviewSection.style.display === 'none';
+            resultUI.reviewSection.style.display = isHidden ? 'block' : 'none';
+            resultUI.showReviewBtn.textContent = isHidden ? 'إخفاء المراجعة' : 'عرض المراجعة';
+        }
+
+        function restartQuiz() {
+            userAnswers = [];
+            startQuiz();
+        }
+
+        // --- Export Results ---
+        function exportResults() {
+            const percentage = Math.round((score / quizQuestions.length) * 100);
+            const date = new Date().toLocaleString('ar-SA', { dateStyle: 'full', timeStyle: 'short' });
+
+            let content = `نتيجة اختبار أصول الفقه\n`;
+            content += `${'='.repeat(40)}\n\n`;
+            content += `التاريخ: ${date}\n`;
+            content += `النتيجة: ${score} من ${quizQuestions.length} (${percentage}%)\n\n`;
+            content += `${'='.repeat(40)}\n`;
+            content += `تفاصيل الإجابات\n`;
+            content += `${'='.repeat(40)}\n\n`;
+
+            userAnswers.forEach((answer, index) => {
+                content += `سؤال ${index + 1}: ${answer.question}\n`;
+                if (answer.isCorrect) {
+                    content += `✓ صحيح: ${answer.userAnswer}\n`;
+                } else {
+                    content += `✗ إجابتك: ${answer.userAnswer}\n`;
+                    content += `✓ الإجابة الصحيحة: ${answer.correctAnswer}\n`;
+                }
+                content += `\n`;
+            });
+
+            // Summary
+            const correctCount = userAnswers.filter(a => a.isCorrect).length;
+            const incorrectCount = userAnswers.filter(a => !a.isCorrect).length;
+
+            content += `${'='.repeat(40)}\n`;
+            content += `ملخص\n`;
+            content += `${'='.repeat(40)}\n`;
+            content += `✓ الإجابات الصحيحة: ${correctCount}\n`;
+            content += `✗ الإجابات الخاطئة: ${incorrectCount}\n`;
+
+            // Download file
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `نتيجة_اختبار_اصول_الفقه_${new Date().toISOString().slice(0, 10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+
+</body>
+
+</html>
