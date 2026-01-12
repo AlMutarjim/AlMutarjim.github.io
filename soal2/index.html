@@ -397,7 +397,6 @@
         let userAnswers = [];
         let currentQuestionIndex = 0;
         let score = 0;
-        let isAnswered = false;
 
         // --- DOM Elements ---
         const screens = {
@@ -563,8 +562,10 @@
         }
 
         function loadQuestion() {
-            isAnswered = false;
             quizUI.nextBtn.style.display = 'none';
+            currentSelection = null;
+            currentCorrectAnswer = null;
+            quizUI.nextBtn.onclick = confirmAndNext;
 
             const currentQ = quizQuestions[currentQuestionIndex];
 
@@ -583,24 +584,54 @@
                 const btn = document.createElement('button');
                 btn.className = 'choice-btn';
                 btn.textContent = choiceText;
-                btn.onclick = () => handleAnswer(btn, choiceText, currentQ.answer);
+                btn.onclick = () => selectAnswer(btn, choiceText);
                 quizUI.choices.appendChild(btn);
             });
         }
 
-        function handleAnswer(selectedBtn, selectedChoice, correctChoice) {
-            if (isAnswered) return;
-            isAnswered = true;
+        // Current selection (not yet confirmed)
+        let currentSelection = null;
+        let currentCorrectAnswer = null;
 
+        function selectAnswer(selectedBtn, selectedChoice) {
             const allButtons = quizUI.choices.querySelectorAll('.choice-btn');
-            const isCorrect = selectedChoice === correctChoice;
 
-            // Record the answer (no visual feedback during quiz)
+            // Reset all buttons to default style
+            allButtons.forEach(btn => {
+                btn.style.borderColor = '#e5e7eb';
+                btn.style.backgroundColor = 'white';
+            });
+
+            // Highlight selected answer
+            selectedBtn.style.borderColor = 'var(--primary-color)';
+            selectedBtn.style.backgroundColor = '#eff6ff';
+
+            // Store current selection
+            currentSelection = selectedChoice;
+            currentCorrectAnswer = quizQuestions[currentQuestionIndex].answer;
+
+            // Show next button
+            if (quizUI.nextBtn.style.display === 'none') {
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    quizUI.nextBtn.textContent = "السؤال التالي";
+                } else {
+                    quizUI.nextBtn.textContent = "عرض النتيجة";
+                }
+                quizUI.nextBtn.style.display = 'inline-block';
+            }
+        }
+
+        function confirmAndNext() {
+            if (!currentSelection) return;
+
+            const isCorrect = currentSelection === currentCorrectAnswer;
+
+            // Record the answer
             userAnswers.push({
                 questionIndex: currentQuestionIndex,
                 question: quizQuestions[currentQuestionIndex].question,
-                userAnswer: selectedChoice,
-                correctAnswer: correctChoice,
+                userAnswer: currentSelection,
+                correctAnswer: currentCorrectAnswer,
                 isCorrect: isCorrect
             });
 
@@ -608,25 +639,17 @@
                 score++;
             }
 
-            // Mark selected answer visually (neutral color, not correct/incorrect)
-            selectedBtn.style.borderColor = 'var(--primary-color)';
-            selectedBtn.style.backgroundColor = '#eff6ff';
+            // Reset selection for next question
+            currentSelection = null;
+            currentCorrectAnswer = null;
 
-            // Disable all buttons
-            allButtons.forEach(btn => btn.disabled = true);
-
-            // Show next button
+            // Move to next question or finish
             if (currentQuestionIndex < quizQuestions.length - 1) {
-                quizUI.nextBtn.textContent = "السؤال التالي";
-                quizUI.nextBtn.onclick = () => {
-                    currentQuestionIndex++;
-                    loadQuestion();
-                };
+                currentQuestionIndex++;
+                loadQuestion();
             } else {
-                quizUI.nextBtn.textContent = "عرض النتيجة";
-                quizUI.nextBtn.onclick = finishQuiz;
+                finishQuiz();
             }
-            quizUI.nextBtn.style.display = 'inline-block';
         }
 
         // --- Result Logic ---
