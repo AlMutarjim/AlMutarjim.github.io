@@ -18,5 +18,13 @@
     {
         "file": "qawaid2.json",
         "name": "qawaid2"
+    },
+    {
+        "file": "qawaid3.json",
+        "name": "qawaid3"
+    },
+    {
+        "file": "qawaid4.json",
+        "name": "qawaid4"
     }
 ]
