@@ -14,5 +14,9 @@
     {
         "file": "qawaid.json",
         "name": "qawaid"
+    },
+    {
+        "file": "qawaid2.json",
+        "name": "qawaid2"
     }
 ]
