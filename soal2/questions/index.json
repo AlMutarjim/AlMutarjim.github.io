@@ -10,5 +10,9 @@
     {
         "file": "questions2.json",
         "name": "الحزمة الثالثة"
+    },
+    {
+        "file": "qawaid.json",
+        "name": "qawaid"
     }
 ]
