@@ -336,11 +336,13 @@
             <button id="retry-btn" class="btn" style="margin-top: 20px;">إعادة محاولة</button>
         </div>
 
-        <!-- Screen 3: Start -->
-        <div id="start-screen" class="screen" tabindex="-1" role="main">
-            <h2>اختبار أصول الفقه</h2>
-            <p class="exam-info">عدد الأسئلة: <strong id="question-count">0</strong></p>
-            <button id="start-btn" class="btn">ابدأ الاختبار</button>
+        <!-- Screen 3: Pack Selection -->
+        <div id="select-screen" class="screen" tabindex="-1" role="main">
+            <h2 style="text-align: center;">اختبار أصول الفقه</h2>
+            <p style="text-align: center; color: #6b7280; margin-bottom: 20px;">اختر حزمة الأسئلة:</p>
+            <div id="pack-list" class="choices-grid">
+                <!-- Pack buttons injected here -->
+            </div>
         </div>
 
         <!-- Screen 4: Quiz -->
@@ -402,7 +404,7 @@
         const screens = {
             loading: document.getElementById('loading-screen'),
             error: document.getElementById('error-screen'),
-            start: document.getElementById('start-screen'),
+            select: document.getElementById('select-screen'),
             quiz: document.getElementById('quiz-screen'),
             result: document.getElementById('result-screen')
         };
@@ -427,52 +429,65 @@
             exportBtn: document.getElementById('export-btn')
         };
 
+        let questionPacks = [];
+
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadData();
+            await loadPackIndex();
             attachEventListeners();
         });
 
-        // --- Data Loading ---
-        async function loadData() {
+        // --- Load Pack Index ---
+        async function loadPackIndex() {
             try {
-                // Try fetch first (works with web servers)
-                let data;
-                if (typeof fetch !== 'undefined') {
-                    try {
-                        const response = await fetch('questions/questions.json', {
-                            headers: { 'Accept': 'application/json' },
-                            cache: 'no-store'
-                        });
-                        if (response.ok) {
-                            data = await response.json();
-                        }
-                    } catch (fetchError) {
-                        console.log('Fetch failed, trying XMLHttpRequest...', fetchError);
-                    }
+                const response = await fetch('questions/index.json', {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                questionPacks = await response.json();
+
+                if (!Array.isArray(questionPacks) || questionPacks.length === 0) {
+                    throw new Error('لا توجد حزم أسئلة');
                 }
 
-                // Fallback to XMLHttpRequest (works better with file:// protocol)
-                if (!data) {
-                    data = await new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('GET', 'questions/questions.json', true);
-                        xhr.responseType = 'json';
-                        xhr.onload = function () {
-                            if (xhr.status === 200 || xhr.status === 0) { // status 0 for file:// protocol
-                                resolve(xhr.response);
-                            } else {
-                                reject(new Error(`HTTP ${xhr.status}`));
-                            }
-                        };
-                        xhr.onerror = function () {
-                            reject(new Error('فشل تحميل الملف. جرب فتح الصفحة عبر خادم محلي.'));
-                        };
-                        xhr.send();
-                    });
-                }
+                renderPackList();
+                showScreen('select');
 
-                allQuestions = data;
+            } catch (err) {
+                console.error('Error loading pack index:', err);
+                showScreen('error');
+                document.getElementById('error-details').textContent = err.message || 'فشل تحميل قائمة الحزم';
+            }
+        }
+
+        // --- Render Pack Selection ---
+        function renderPackList() {
+            const packList = document.getElementById('pack-list');
+            packList.innerHTML = '';
+
+            questionPacks.forEach((pack, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = pack.name;
+                btn.onclick = () => loadPack(pack.file);
+                packList.appendChild(btn);
+            });
+        }
+
+        // --- Load Selected Pack ---
+        async function loadPack(filename) {
+            showScreen('loading');
+
+            try {
+                const response = await fetch(`questions/${filename}`, {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                allQuestions = await response.json();
 
                 if (!Array.isArray(allQuestions) || allQuestions.length === 0) {
                     throw new Error('ملف الأسئلة فارغ');
@@ -484,11 +499,11 @@
                     console.warn(`${invalidCount} سؤال غير صحيح في الصيغة`);
                 }
 
-                document.getElementById('question-count').textContent = allQuestions.length;
-                showScreen('start');
+                // Start the quiz immediately after loading
+                startQuiz();
 
             } catch (err) {
-                console.error('Error loading data:', err);
+                console.error('Error loading pack:', err);
                 showScreen('error');
                 document.getElementById('error-details').textContent = err.message || 'فشل تحميل الأسئلة';
             }
@@ -513,8 +528,7 @@
 
         // --- Event Listeners ---
         function attachEventListeners() {
-            document.getElementById('retry-btn').addEventListener('click', () => loadData());
-            document.getElementById('start-btn').addEventListener('click', startQuiz);
+            document.getElementById('retry-btn').addEventListener('click', () => loadPackIndex());
             resultUI.restartBtn.addEventListener('click', restartQuiz);
             resultUI.showReviewBtn.addEventListener('click', toggleReview);
             resultUI.exportBtn.addEventListener('click', exportResults);
@@ -525,14 +539,14 @@
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
             if (screens.quiz.classList.contains('active-screen')) {
-                if (!isAnswered && /^[1-4]$/.test(e.key)) {
+                if (/^[1-4]$/.test(e.key)) {
                     e.preventDefault();
                     const buttons = quizUI.choices.querySelectorAll('.choice-btn');
                     const index = parseInt(e.key) - 1;
                     if (buttons[index] && !buttons[index].disabled) {
                         buttons[index].click();
                     }
-                } else if (isAnswered && (e.key === 'Enter' || e.key === ' ')) {
+                } else if (currentSelection && (e.key === 'Enter' || e.key === ' ')) {
                     e.preventDefault();
                     if (quizUI.nextBtn.style.display !== 'none') {
                         quizUI.nextBtn.click();
@@ -711,7 +725,15 @@
 
         function restartQuiz() {
             userAnswers = [];
-            startQuiz();
+            allQuestions = [];
+            quizQuestions = [];
+            score = 0;
+            currentQuestionIndex = 0;
+            currentSelection = null;
+            currentCorrectAnswer = null;
+            resultUI.reviewSection.style.display = 'none';
+            resultUI.showReviewBtn.textContent = 'عرض المراجعة';
+            showScreen('select');
         }
 
         // --- Export Results ---
