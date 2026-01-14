@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="حفظ الكتب ومؤلفيها في أصول الفقه والقواعد الفقهية ومقاصد الشريعة">
+    <title>حفظ الكتب ومؤلفيها</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --surface-color: #334155;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --border-color: #475569;
+            --gradient-start: #6366f1;
+            --gradient-end: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 24px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Mode Tabs */
+        .mode-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .mode-tab {
+            flex: 1;
+            min-width: 140px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 16px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .mode-tab:hover {
+            border-color: var(--primary-color);
+            background: var(--surface-color);
+        }
+
+        .mode-tab.active {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-color: transparent;
+        }
+
+        .mode-tab .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Filter Section */
+        .filters {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Study Mode */
+        #study-mode {
+            display: none;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .book-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .book-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .book-card.expanded {
+            border-color: var(--primary-color);
+            background: var(--surface-color);
+        }
+
+        .book-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .book-details {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .book-card.expanded .book-details {
+            display: block;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .book-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: var(--surface-color);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* Quiz Mode */
+        #quiz-mode {
+            display: none;
+        }
+
+        .quiz-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quiz-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .progress-text {
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .score-text {
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        .question-type {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .question-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .choices-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .choice-btn {
+            background: var(--surface-color);
+            border: 2px solid var(--border-color);
+            padding: 18px 24px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            text-align: right;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-color);
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .choice-btn.selected {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .choice-btn.correct {
+            border-color: var(--success-color);
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .choice-btn.incorrect {
+            border-color: var(--error-color);
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .choice-btn:disabled {
+            cursor: default;
+        }
+
+        .quiz-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--surface-color);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            box-shadow: none;
+        }
+
+        /* Results */
+        #results-mode {
+            display: none;
+            text-align: center;
+        }
+
+        .results-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+        }
+
+        .results-score {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .results-message {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+        }
+
+        .results-details {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .result-stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stat-correct { color: var(--success-color); }
+        .stat-incorrect { color: var(--error-color); }
+
+        /* Flashcard Mode */
+        #flashcard-mode {
+            display: none;
+        }
+
+        .flashcard {
+            background: var(--card-bg);
+            border-radius: 20px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .flashcard-label {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--surface-color);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .flashcard-content {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .flashcard.flipped .flashcard-content {
+            color: var(--primary-color);
+        }
+
+        .flashcard-hint {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        .flashcard-counter {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .flashcard-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .question-text {
+                font-size: 1.3rem;
+            }
+
+            .flashcard-content {
+                font-size: 1.5rem;
+            }
+
+            .results-score {
+                font-size: 3.5rem;
+            }
+
+            .mode-tab {
+                min-width: 100px;
+                padding: 12px;
+            }
+
+            .mode-tab .icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📚 حفظ الكتب ومؤلفيها</h1>
+        <div class="header-stats">
+            <span id="total-books">٠ كتاب</span>
+            <span>•</span>
+            <span id="total-authors">٠ مؤلف</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Mode Tabs -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="study">
+                <span class="icon">📖</span>
+                المراجعة
+            </button>
+            <button class="mode-tab" data-mode="flashcard">
+                <span class="icon">🔄</span>
+                البطاقات
+            </button>
+            <button class="mode-tab" data-mode="quiz">
+                <span class="icon">✍️</span>
+                الاختبار
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>الموضوع</label>
+                    <select id="topic-filter">
+                        <option value="">الكل</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>المذهب</label>
+                    <select id="school-filter">
+                        <option value="">الكل</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Mode -->
+        <div id="study-mode">
+            <input type="text" class="search-box" id="search-input" placeholder="ابحث عن كتاب أو مؤلف...">
+            <div class="book-list" id="book-list"></div>
+        </div>
+
+        <!-- Flashcard Mode -->
+        <div id="flashcard-mode">
+            <div class="flashcard-counter" id="flashcard-counter">١ / ١٠</div>
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <span class="flashcard-label" id="flashcard-label">الكتاب</span>
+                <div class="flashcard-content" id="flashcard-content">اسم الكتاب</div>
+                <div class="flashcard-hint">انقر للكشف عن الإجابة</div>
+            </div>
+            <div class="flashcard-actions">
+                <button class="btn btn-secondary" onclick="prevCard()">← السابق</button>
+                <button class="btn" onclick="nextCard()">التالي →</button>
+                <button class="btn btn-secondary" onclick="shuffleCards()">🔀 خلط</button>
+            </div>
+        </div>
+
+        <!-- Quiz Mode -->
+        <div id="quiz-mode">
+            <div class="quiz-container">
+                <div class="quiz-progress">
+                    <span class="progress-text" id="quiz-progress">السؤال ١ من ١٠</span>
+                    <span class="score-text" id="quiz-score">✓ ٠</span>
+                </div>
+                <div class="question-type" id="question-type">من مؤلف هذا الكتاب؟</div>
+                <div class="question-text" id="question-text">اسم الكتاب</div>
+                <div class="choices-grid" id="choices-grid"></div>
+                <div class="quiz-actions">
+                    <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>السؤال التالي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Mode -->
+        <div id="results-mode">
+            <div class="results-card fade-in">
+                <div class="results-score" id="final-score">٨٠٪</div>
+                <div class="results-message" id="results-message">أحسنت!</div>
+                <div class="results-details">
+                    <div class="result-stat">
+                        <div class="result-stat-value stat-correct" id="correct-count">٨</div>
+                        <div class="result-stat-label">إجابات صحيحة</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-value stat-incorrect" id="incorrect-count">٢</div>
+                        <div class="result-stat-label">إجابات خاطئة</div>
+                    </div>
+                </div>
+                <div class="quiz-actions">
+                    <button class="btn" onclick="startQuiz()">إعادة الاختبار</button>
+                    <button class="btn btn-secondary" onclick="switchMode('study')">العودة للمراجعة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State ---
+        let allBooks = [];
+        let filteredBooks = [];
+        let currentMode = 'study';
+
+        // Flashcard state
+        let flashcardIndex = 0;
+        let flashcardFlipped = false;
+        let flashcardShowBook = true; // true = show book, reveal author; false = show author, reveal book
+
+        // Quiz state
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let answered = false;
+
+        // --- Arabic numerals ---
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        function toArabic(num) {
+            return String(num).replace(/\d/g, d => arabicNumerals[d]);
+        }
+
+        // --- Load Data ---
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                allBooks = await response.json();
+                filteredBooks = [...allBooks];
+                
+                populateFilters();
+                updateStats();
+                renderStudyMode();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // --- Populate Filters ---
+        function populateFilters() {
+            const topics = [...new Set(allBooks.map(b => b.topic))];
+            const schools = [...new Set(allBooks.map(b => b.school))];
+            
+            const topicSelect = document.getElementById('topic-filter');
+            topics.forEach(topic => {
+                const option = document.createElement('option');
+                option.value = topic;
+                option.textContent = topic;
+                topicSelect.appendChild(option);
+            });
+
+            const schoolSelect = document.getElementById('school-filter');
+            schools.forEach(school => {
+                const option = document.createElement('option');
+                option.value = school;
+                option.textContent = school;
+                schoolSelect.appendChild(option);
+            });
+        }
+
+        // --- Update Stats ---
+        function updateStats() {
+            const authors = [...new Set(allBooks.map(b => b.author))];
+            document.getElementById('total-books').textContent = toArabic(allBooks.length) + ' كتاب';
+            document.getElementById('total-authors').textContent = toArabic(authors.length) + ' مؤلف';
+        }
+
+        // --- Filter Books ---
+        function applyFilters() {
+            const topic = document.getElementById('topic-filter').value;
+            const school = document.getElementById('school-filter').value;
+            const search = document.getElementById('search-input')?.value.toLowerCase() || '';
+
+            filteredBooks = allBooks.filter(book => {
+                const matchTopic = !topic || book.topic === topic;
+                const matchSchool = !school || book.school === school;
+                const matchSearch = !search || 
+                    book.name.toLowerCase().includes(search) || 
+                    book.author.toLowerCase().includes(search);
+                return matchTopic && matchSchool && matchSearch;
+            });
+
+            if (currentMode === 'study') {
+                renderStudyMode();
+            } else if (currentMode === 'flashcard') {
+                flashcardIndex = 0;
+                flashcardFlipped = false;
+                renderFlashcard();
+            }
+        }
+
+        // --- Study Mode ---
+        function renderStudyMode() {
+            const list = document.getElementById('book-list');
+            list.innerHTML = '';
+
+            if (filteredBooks.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <div>لا توجد نتائج</div>
+                    </div>
+                `;
+                return;
+            }
+
+            filteredBooks.forEach((book, index) => {
+                const card = document.createElement('div');
+                card.className = 'book-card fade-in';
+                card.style.animationDelay = `${index * 0.03}s`;
+                card.innerHTML = `
+                    <div class="book-title">${book.name}</div>
+                    <div class="book-tags">
+                        <span class="tag">${book.topic}</span>
+                        <span class="tag">${book.school}</span>
+                    </div>
+                    <div class="book-details">
+                        <div class="detail-row">
+                            <span class="detail-label">المؤلف</span>
+                            <span class="detail-value">${book.author}</span>
+                        </div>
+                        ${book.desc ? `
+                        <div class="detail-row">
+                            <span class="detail-label">الوصف</span>
+                            <span class="detail-value">${book.desc}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                card.onclick = () => card.classList.toggle('expanded');
+                list.appendChild(card);
+            });
+        }
+
+        // --- Flashcard Mode ---
+        function renderFlashcard() {
+            if (filteredBooks.length === 0) {
+                document.getElementById('flashcard-counter').textContent = 'لا توجد كتب';
+                document.getElementById('flashcard-content').textContent = 'قم بتغيير الفلاتر';
+                document.getElementById('flashcard-label').textContent = '';
+                return;
+            }
+
+            const book = filteredBooks[flashcardIndex];
+            const counter = document.getElementById('flashcard-counter');
+            const content = document.getElementById('flashcard-content');
+            const label = document.getElementById('flashcard-label');
+            const flashcard = document.getElementById('flashcard');
+            const hint = flashcard.querySelector('.flashcard-hint');
+
+            counter.textContent = toArabic(flashcardIndex + 1) + ' / ' + toArabic(filteredBooks.length);
+
+            if (flashcardFlipped) {
+                flashcard.classList.add('flipped');
+                if (flashcardShowBook) {
+                    label.textContent = 'المؤلف';
+                    content.textContent = book.author;
+                } else {
+                    label.textContent = 'الكتاب';
+                    content.textContent = book.name;
+                }
+                hint.textContent = 'انقر للانتقال';
+            } else {
+                flashcard.classList.remove('flipped');
+                if (flashcardShowBook) {
+                    label.textContent = 'الكتاب';
+                    content.textContent = book.name;
+                } else {
+                    label.textContent = 'المؤلف';
+                    content.textContent = book.author;
+                }
+                hint.textContent = 'انقر للكشف عن الإجابة';
+            }
+        }
+
+        function flipCard() {
+            if (filteredBooks.length === 0) return;
+            if (flashcardFlipped) {
+                nextCard();
+            } else {
+                flashcardFlipped = true;
+                renderFlashcard();
+            }
+        }
+
+        function nextCard() {
+            if (filteredBooks.length === 0) return;
+            flashcardIndex = (flashcardIndex + 1) % filteredBooks.length;
+            flashcardFlipped = false;
+            flashcardShowBook = Math.random() > 0.5; // Randomize direction
+            renderFlashcard();
+        }
+
+        function prevCard() {
+            if (filteredBooks.length === 0) return;
+            flashcardIndex = (flashcardIndex - 1 + filteredBooks.length) % filteredBooks.length;
+            flashcardFlipped = false;
+            flashcardShowBook = Math.random() > 0.5;
+            renderFlashcard();
+        }
+
+        function shuffleCards() {
+            flashcardIndex = 0;
+            flashcardFlipped = false;
+            shuffleArray(filteredBooks);
+            renderFlashcard();
+        }
+
+        // --- Quiz Mode ---
+        function startQuiz() {
+            if (filteredBooks.length < 4) {
+                alert('تحتاج إلى ٤ كتب على الأقل للاختبار');
+                return;
+            }
+
+            // Generate questions
+            quizQuestions = [];
+            const shuffled = [...filteredBooks];
+            shuffleArray(shuffled);
+            const questionCount = Math.min(10, shuffled.length);
+
+            for (let i = 0; i < questionCount; i++) {
+                const book = shuffled[i];
+                const isBookToAuthor = Math.random() > 0.5;
+
+                // Get wrong answers
+                const wrongAnswers = allBooks
+                    .filter(b => b.author !== book.author)
+                    .map(b => isBookToAuthor ? b.author : b.name);
+                
+                shuffleArray(wrongAnswers);
+                const choices = [
+                    isBookToAuthor ? book.author : book.name,
+                    ...wrongAnswers.slice(0, 3)
+                ];
+                shuffleArray(choices);
+
+                quizQuestions.push({
+                    book: book,
+                    isBookToAuthor: isBookToAuthor,
+                    question: isBookToAuthor ? book.name : book.author,
+                    correctAnswer: isBookToAuthor ? book.author : book.name,
+                    choices: choices
+                });
+            }
+
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('results-mode').style.display = 'none';
+            document.getElementById('quiz-mode').style.display = 'block';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = quizQuestions[currentQuestionIndex];
+            
+            document.getElementById('quiz-progress').textContent = 
+                'السؤال ' + toArabic(currentQuestionIndex + 1) + ' من ' + toArabic(quizQuestions.length);
+            document.getElementById('quiz-score').textContent = '✓ ' + toArabic(score);
+            document.getElementById('question-type').textContent = 
+                q.isBookToAuthor ? 'من مؤلف هذا الكتاب؟' : 'ما هو كتاب هذا المؤلف؟';
+            document.getElementById('question-text').textContent = q.question;
+
+            const grid = document.getElementById('choices-grid');
+            grid.innerHTML = '';
+
+            q.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice;
+                btn.onclick = () => selectChoice(btn, choice);
+                grid.appendChild(btn);
+            });
+
+            selectedAnswer = null;
+            answered = false;
+            document.getElementById('next-btn').disabled = true;
+        }
+
+        function selectChoice(btn, choice) {
+            if (answered) return;
+            answered = true;
+            selectedAnswer = choice;
+
+            const q = quizQuestions[currentQuestionIndex];
+            const isCorrect = choice === q.correctAnswer;
+
+            if (isCorrect) {
+                score++;
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('incorrect');
+                // Show correct answer
+                document.querySelectorAll('.choice-btn').forEach(b => {
+                    if (b.textContent === q.correctAnswer) {
+                        b.classList.add('correct');
+                    }
+                });
+            }
+
+            document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+            document.getElementById('quiz-score').textContent = '✓ ' + toArabic(score);
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= quizQuestions.length) {
+                showResults();
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-mode').style.display = 'none';
+            document.getElementById('results-mode').style.display = 'block';
+
+            const percentage = Math.round((score / quizQuestions.length) * 100);
+            document.getElementById('final-score').textContent = toArabic(percentage) + '٪';
+            document.getElementById('correct-count').textContent = toArabic(score);
+            document.getElementById('incorrect-count').textContent = toArabic(quizQuestions.length - score);
+
+            let message = '';
+            if (percentage >= 90) message = 'ممتاز! حفظك قوي جداً 🌟';
+            else if (percentage >= 70) message = 'أحسنت! استمر في المراجعة 👍';
+            else if (percentage >= 50) message = 'جيد، تحتاج لمزيد من المراجعة 📖';
+            else message = 'لا بأس، أعد المحاولة 💪';
+
+            document.getElementById('results-message').textContent = message;
+        }
+
+        // --- Mode Switching ---
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.mode === mode);
+            });
+
+            document.getElementById('study-mode').style.display = mode === 'study' ? 'block' : 'none';
+            document.getElementById('flashcard-mode').style.display = mode === 'flashcard' ? 'block' : 'none';
+            document.getElementById('quiz-mode').style.display = mode === 'quiz' ? 'block' : 'none';
+            document.getElementById('results-mode').style.display = 'none';
+
+            if (mode === 'study') {
+                renderStudyMode();
+            } else if (mode === 'flashcard') {
+                flashcardIndex = 0;
+                flashcardFlipped = false;
+                flashcardShowBook = Math.random() > 0.5;
+                renderFlashcard();
+            } else if (mode === 'quiz') {
+                startQuiz();
+            }
+        }
+
+        // --- Utility ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- Event Listeners ---
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.onclick = () => switchMode(tab.dataset.mode);
+        });
+
+        document.getElementById('topic-filter').onchange = applyFilters;
+        document.getElementById('school-filter').onchange = applyFilters;
+        document.getElementById('search-input').oninput = applyFilters;
+
+        // --- Initialize ---
+        loadData();
+    </script>
+</body>
+</html>
