@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -436,8 +437,13 @@
             font-size: 0.9rem;
         }
 
-        .stat-correct { color: var(--success-color); }
-        .stat-incorrect { color: var(--error-color); }
+        .stat-correct {
+            color: var(--success-color);
+        }
+
+        .stat-incorrect {
+            color: var(--error-color);
+        }
 
         /* Flashcard Mode */
         #flashcard-mode {
@@ -550,8 +556,15 @@
 
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .fade-in {
@@ -559,9 +572,19 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
         .shake {
@@ -576,6 +599,7 @@
         }
     </style>
 </head>
+
 <body>
     <header class="header">
         <h1>📚 حفظ الكتب ومؤلفيها</h1>
@@ -690,7 +714,6 @@
         // Flashcard state
         let flashcardIndex = 0;
         let flashcardFlipped = false;
-        let flashcardShowBook = true; // true = show book, reveal author; false = show author, reveal book
 
         // Quiz state
         let quizQuestions = [];
@@ -711,7 +734,7 @@
                 const response = await fetch('data.json');
                 allBooks = await response.json();
                 filteredBooks = [...allBooks];
-                
+
                 populateFilters();
                 updateStats();
                 renderStudyMode();
@@ -722,9 +745,9 @@
 
         // --- Populate Filters ---
         function populateFilters() {
-            const topics = [...new Set(allBooks.map(b => b.topic))];
+            const topics = [...new Set(allBooks.flatMap(b => b.topic))];
             const schools = [...new Set(allBooks.map(b => b.school))];
-            
+
             const topicSelect = document.getElementById('topic-filter');
             topics.forEach(topic => {
                 const option = document.createElement('option');
@@ -756,10 +779,10 @@
             const search = document.getElementById('search-input')?.value.toLowerCase() || '';
 
             filteredBooks = allBooks.filter(book => {
-                const matchTopic = !topic || book.topic === topic;
+                const matchTopic = !topic || book.topic.includes(topic);
                 const matchSchool = !school || book.school === school;
-                const matchSearch = !search || 
-                    book.name.toLowerCase().includes(search) || 
+                const matchSearch = !search ||
+                    book.name.toLowerCase().includes(search) ||
                     book.author.toLowerCase().includes(search);
                 return matchTopic && matchSchool && matchSearch;
             });
@@ -795,7 +818,7 @@
                 card.innerHTML = `
                     <div class="book-title">${book.name}</div>
                     <div class="book-tags">
-                        <span class="tag">${book.topic}</span>
+                        ${book.topic.map(t => `<span class="tag">${t}</span>`).join('')}
                         <span class="tag">${book.school}</span>
                     </div>
                     <div class="book-details">
@@ -836,23 +859,13 @@
 
             if (flashcardFlipped) {
                 flashcard.classList.add('flipped');
-                if (flashcardShowBook) {
-                    label.textContent = 'المؤلف';
-                    content.textContent = book.author;
-                } else {
-                    label.textContent = 'الكتاب';
-                    content.textContent = book.name;
-                }
+                label.textContent = 'المؤلف';
+                content.textContent = book.author;
                 hint.textContent = 'انقر للانتقال';
             } else {
                 flashcard.classList.remove('flipped');
-                if (flashcardShowBook) {
-                    label.textContent = 'الكتاب';
-                    content.textContent = book.name;
-                } else {
-                    label.textContent = 'المؤلف';
-                    content.textContent = book.author;
-                }
+                label.textContent = 'الكتاب';
+                content.textContent = book.name;
                 hint.textContent = 'انقر للكشف عن الإجابة';
             }
         }
@@ -871,7 +884,6 @@
             if (filteredBooks.length === 0) return;
             flashcardIndex = (flashcardIndex + 1) % filteredBooks.length;
             flashcardFlipped = false;
-            flashcardShowBook = Math.random() > 0.5; // Randomize direction
             renderFlashcard();
         }
 
@@ -879,7 +891,6 @@
             if (filteredBooks.length === 0) return;
             flashcardIndex = (flashcardIndex - 1 + filteredBooks.length) % filteredBooks.length;
             flashcardFlipped = false;
-            flashcardShowBook = Math.random() > 0.5;
             renderFlashcard();
         }
 
@@ -911,7 +922,7 @@
                 const wrongAnswers = allBooks
                     .filter(b => b.author !== book.author)
                     .map(b => isBookToAuthor ? b.author : b.name);
-                
+
                 shuffleArray(wrongAnswers);
                 const choices = [
                     isBookToAuthor ? book.author : book.name,
@@ -937,11 +948,11 @@
 
         function renderQuestion() {
             const q = quizQuestions[currentQuestionIndex];
-            
-            document.getElementById('quiz-progress').textContent = 
+
+            document.getElementById('quiz-progress').textContent =
                 'السؤال ' + toArabic(currentQuestionIndex + 1) + ' من ' + toArabic(quizQuestions.length);
             document.getElementById('quiz-score').textContent = '✓ ' + toArabic(score);
-            document.getElementById('question-type').textContent = 
+            document.getElementById('question-type').textContent =
                 q.isBookToAuthor ? 'من مؤلف هذا الكتاب؟' : 'ما هو كتاب هذا المؤلف؟';
             document.getElementById('question-text').textContent = q.question;
 
@@ -1017,7 +1028,7 @@
         // --- Mode Switching ---
         function switchMode(mode) {
             currentMode = mode;
-            
+
             document.querySelectorAll('.mode-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.mode === mode);
             });
@@ -1032,7 +1043,6 @@
             } else if (mode === 'flashcard') {
                 flashcardIndex = 0;
                 flashcardFlipped = false;
-                flashcardShowBook = Math.random() > 0.5;
                 renderFlashcard();
             } else if (mode === 'quiz') {
                 startQuiz();
@@ -1061,4 +1071,5 @@
         loadData();
     </script>
 </body>
+
 </html>
