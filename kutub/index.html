@@ -258,6 +258,15 @@
             display: none;
         }
 
+        #marathon-mode {
+            display: none;
+        }
+
+        #marathon-complete {
+            display: none;
+            text-align: center;
+        }
+
         .quiz-container {
             background: var(--card-bg);
             border-radius: 16px;
@@ -625,6 +634,10 @@
                 <span class="icon">✍️</span>
                 الاختبار
             </button>
+            <button class="mode-tab" data-mode="marathon">
+                <span class="icon">🏃</span>
+                الماراثون
+            </button>
         </div>
 
         <!-- Filters -->
@@ -703,6 +716,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Marathon Mode -->
+        <div id="marathon-mode">
+            <div class="quiz-container">
+                <div class="quiz-progress">
+                    <span class="progress-text" id="marathon-progress">المتبقي: ٥٠</span>
+                    <span class="score-text" id="marathon-mastered">✓ تم إتقان: ٠</span>
+                </div>
+                <div class="question-type" id="marathon-type">من مؤلف هذا الكتاب؟</div>
+                <div class="question-text" id="marathon-question">اسم الكتاب</div>
+                <div class="choices-grid" id="marathon-choices"></div>
+                <div class="quiz-actions">
+                    <button class="btn" id="marathon-next-btn" onclick="marathonNext()" disabled>التالي</button>
+                    <button class="btn btn-secondary" onclick="switchMode('study')">إنهاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marathon Complete -->
+        <div id="marathon-complete">
+            <div class="results-card fade-in">
+                <div class="results-score">🏆</div>
+                <div class="results-message" id="marathon-complete-message">أتقنت جميع الكتب!</div>
+                <div class="results-details">
+                    <div class="result-stat">
+                        <div class="result-stat-value stat-correct" id="marathon-total-mastered">٥٠</div>
+                        <div class="result-stat-label">كتاب تم إتقانه</div>
+                    </div>
+                    <div class="result-stat">
+                        <div class="result-stat-value" style="color: var(--warning-color);"
+                            id="marathon-total-attempts">٦٥</div>
+                        <div class="result-stat-label">محاولة</div>
+                    </div>
+                </div>
+                <div class="quiz-actions">
+                    <button class="btn" onclick="startMarathon()">إعادة الماراثون</button>
+                    <button class="btn btn-secondary" onclick="switchMode('study')">العودة للمراجعة</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -721,6 +774,13 @@
         let score = 0;
         let selectedAnswer = null;
         let answered = false;
+
+        // Marathon state
+        let marathonQueue = [];      // Books still to be tested
+        let marathonMastered = [];   // Books answered correctly
+        let marathonCurrent = null;  // Current question
+        let marathonAttempts = 0;    // Total attempts made
+        let marathonAnswered = false;
 
         // --- Arabic numerals ---
         const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -1025,6 +1085,124 @@
             document.getElementById('results-message').textContent = message;
         }
 
+        // --- Marathon Mode ---
+        function startMarathon() {
+            if (filteredBooks.length < 4) {
+                alert('تحتاج إلى ٤ كتب على الأقل للماراثون');
+                return;
+            }
+
+            // Initialize marathon
+            marathonQueue = [...filteredBooks];
+            shuffleArray(marathonQueue);
+            marathonMastered = [];
+            marathonAttempts = 0;
+
+            document.getElementById('marathon-complete').style.display = 'none';
+            document.getElementById('marathon-mode').style.display = 'block';
+
+            loadMarathonQuestion();
+        }
+
+        function loadMarathonQuestion() {
+            if (marathonQueue.length === 0) {
+                showMarathonComplete();
+                return;
+            }
+
+            // Pick next book from queue
+            const book = marathonQueue[0];
+
+            // Generate wrong answers from ALL books (not just filtered)
+            const wrongAuthors = allBooks
+                .filter(b => b.author !== book.author)
+                .map(b => b.author);
+
+            shuffleArray(wrongAuthors);
+            const choices = [book.author, ...wrongAuthors.slice(0, 3)];
+            shuffleArray(choices);
+
+            marathonCurrent = {
+                book: book,
+                correctAnswer: book.author,
+                choices: choices
+            };
+            marathonAnswered = false;
+
+            // Update UI
+            document.getElementById('marathon-progress').textContent =
+                'المتبقي: ' + toArabic(marathonQueue.length);
+            document.getElementById('marathon-mastered').textContent =
+                '✓ تم إتقان: ' + toArabic(marathonMastered.length);
+            document.getElementById('marathon-type').textContent = 'من مؤلف هذا الكتاب؟';
+            document.getElementById('marathon-question').textContent = book.name;
+
+            const grid = document.getElementById('marathon-choices');
+            grid.innerHTML = '';
+
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice;
+                btn.onclick = () => selectMarathonChoice(btn, choice);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('marathon-next-btn').disabled = true;
+        }
+
+        function selectMarathonChoice(btn, choice) {
+            if (marathonAnswered) return;
+            marathonAnswered = true;
+            marathonAttempts++;
+
+            const isCorrect = choice === marathonCurrent.correctAnswer;
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                // Remove from queue and add to mastered
+                marathonQueue.shift();
+                marathonMastered.push(marathonCurrent.book);
+            } else {
+                btn.classList.add('incorrect');
+                // Show correct answer
+                document.querySelectorAll('#marathon-choices .choice-btn').forEach(b => {
+                    if (b.textContent === marathonCurrent.correctAnswer) {
+                        b.classList.add('correct');
+                    }
+                });
+                // Move to end of queue (will be tested again)
+                const wrongBook = marathonQueue.shift();
+                marathonQueue.push(wrongBook);
+            }
+
+            document.querySelectorAll('#marathon-choices .choice-btn').forEach(b => b.disabled = true);
+            document.getElementById('marathon-mastered').textContent =
+                '✓ تم إتقان: ' + toArabic(marathonMastered.length);
+            document.getElementById('marathon-next-btn').disabled = false;
+        }
+
+        function marathonNext() {
+            loadMarathonQuestion();
+        }
+
+        function showMarathonComplete() {
+            document.getElementById('marathon-mode').style.display = 'none';
+            document.getElementById('marathon-complete').style.display = 'block';
+
+            document.getElementById('marathon-total-mastered').textContent = toArabic(marathonMastered.length);
+            document.getElementById('marathon-total-attempts').textContent = toArabic(marathonAttempts);
+
+            const efficiency = Math.round((marathonMastered.length / marathonAttempts) * 100);
+            let message = '';
+            if (efficiency >= 90) message = 'ممتاز! حفظك متقن جداً 🌟';
+            else if (efficiency >= 70) message = 'أحسنت! أتقنت الكتب بشكل جيد 👍';
+            else if (efficiency >= 50) message = 'جيد! واصل المراجعة لتثبيت الحفظ 📖';
+            else message = 'أتممت الماراثون! المراجعة المستمرة مفتاح الحفظ 💪';
+
+            document.getElementById('marathon-complete-message').textContent = message;
+        }
+
         // --- Mode Switching ---
         function switchMode(mode) {
             currentMode = mode;
@@ -1036,7 +1214,9 @@
             document.getElementById('study-mode').style.display = mode === 'study' ? 'block' : 'none';
             document.getElementById('flashcard-mode').style.display = mode === 'flashcard' ? 'block' : 'none';
             document.getElementById('quiz-mode').style.display = mode === 'quiz' ? 'block' : 'none';
+            document.getElementById('marathon-mode').style.display = mode === 'marathon' ? 'block' : 'none';
             document.getElementById('results-mode').style.display = 'none';
+            document.getElementById('marathon-complete').style.display = 'none';
 
             if (mode === 'study') {
                 renderStudyMode();
@@ -1046,6 +1226,8 @@
                 renderFlashcard();
             } else if (mode === 'quiz') {
                 startQuiz();
+            } else if (mode === 'marathon') {
+                startMarathon();
             }
         }
 
